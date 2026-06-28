@@ -40,6 +40,15 @@ const ai = new GoogleGenerativeAI(GEMINI_API_KEY);
 const supabaseKey = SUPABASE_SERVICE_ROLE_KEY || VITE_SUPABASE_ANON_KEY;
 const supabase = createClient(VITE_SUPABASE_URL, supabaseKey);
 
+// Clear webhook to ensure polling works
+bot.deleteWebHook()
+  .then(() => console.log("🧹 Cleared old webhooks successfully."))
+  .catch((err) => console.error("Warning: Failed to clear webhook:", err.message));
+
+// Add error listeners
+bot.on("polling_error", (err) => console.error("Polling Error:", err.message));
+bot.on("error", (err) => console.error("Bot Error:", err.message));
+
 console.log("🚀 Job Aggregator Bot is running...");
 console.log(`Allowed Users: ${allowedIds.length ? allowedIds.join(", ") : "All Users (Caution!)"}`);
 

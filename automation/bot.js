@@ -65,10 +65,10 @@ http.createServer((req, res) => {
 function extractUrls(text) {
   const urlRegex = /(https?:\/\/[^\s]+)/g;
   const matches = text.match(urlRegex) || [];
-  
+
   // Filter out common Telegram, WhatsApp, and social share domains
   const ignorePatterns = [
-    "t.me", "telegram.me", "wa.me", "whatsapp.com", "instagram.com", 
+    "t.me", "telegram.me", "wa.me", "whatsapp.com", "instagram.com",
     "facebook.com", "linkedin.com", "twitter.com", "x.com", "youtube.com"
   ];
 
@@ -169,7 +169,7 @@ bot.on("message", async (msg) => {
   }
 
   const urls = extractUrls(text);
-  
+
   if (urls.length === 0) {
     return bot.sendMessage(chatId, "⚠️ Please send or forward a message that contains links to the job listings.");
   }
@@ -200,7 +200,7 @@ bot.on("message", async (msg) => {
   // 2. Query Gemini
   try {
     const model = ai.getGenerativeModel({ model: "gemini-2.5-flash" });
-    
+
     const prompt = `
 You are a job parser AI. Your task is to analyze a raw job post message and the text/links crawled from its linked landing pages.
 The message contains multiple job listings. Your goal is to map each job to its crawled page context and extract the details.
@@ -238,14 +238,14 @@ Note: If the Crawled Pages Context lacks explicit skills or responsibilities, in
 
     const result = await model.generateContent(prompt);
     let responseText = result.response.text().trim();
-    
+
     // Clean markdown code blocks if AI wraps it
     if (responseText.startsWith("```")) {
       responseText = responseText.replace(/^```json/, "").replace(/```$/, "").trim();
     }
 
     const jobsData = JSON.parse(responseText);
-    
+
     if (!Array.isArray(jobsData)) {
       throw new Error("Gemini did not return an array of job listings.");
     }
@@ -303,7 +303,7 @@ Note: If the Crawled Pages Context lacks explicit skills or responsibilities, in
 
     // 4. Send final template response
     const today = new Date().toLocaleDateString("en-US", { day: "numeric", month: "long", year: "numeric" }).toUpperCase();
-    
+
     let formattedPost = `*📝 LATEST JOB OPENINGS | ${today}*\n\n`;
 
     insertedJobs.forEach((job) => {

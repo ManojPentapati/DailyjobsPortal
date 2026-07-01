@@ -8,7 +8,8 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "bot": "node automation/bot.js"
+    "bot": "node automation/bot.js",
+    "start": "node automation/bot.js"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

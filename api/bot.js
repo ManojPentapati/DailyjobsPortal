@@ -230,9 +230,19 @@ Note: If the Crawled Pages Context lacks explicit skills or responsibilities, in
 
     const insertedJobs = [];
 
+    // Local Helper: Generate a URL slug
+    const generateSlug = (company, title) => {
+      const normalizedCompany = company.toLowerCase().trim().replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-");
+      const normalizedTitle = title.toLowerCase().trim().replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-");
+      const baseSlug = `${normalizedCompany}-${normalizedTitle}`.replace(/-+/g, "-");
+      const randomSuffix = Math.floor(1000 + Math.random() * 9000);
+      return `${baseSlug}-${randomSuffix}`.substring(0, 100);
+    };
+
     // Loop through each job and save to Supabase
     for (const jobData of jobsData) {
       const logoUrl = await fetchLogoUrl(jobData.company);
+      const jobSlug = generateSlug(jobData.company, jobData.title);
       const expiresAt = new Date();
       expiresAt.setDate(expiresAt.getDate() + 30);
 
@@ -253,6 +263,7 @@ Note: If the Crawled Pages Context lacks explicit skills or responsibilities, in
           passout_year: jobData.passout_year,
           job_type: jobData.job_type,
           apply_link: jobData.apply_link,
+          slug: jobSlug,
           is_active: true,
           is_featured: false,
           expires_at: expiresAt.toISOString(),
@@ -261,7 +272,7 @@ Note: If the Crawled Pages Context lacks explicit skills or responsibilities, in
         .single();
 
       if (!dbError && inserted) {
-        insertedJobs.push({ ...jobData, dbId: inserted.id });
+        insertedJobs.push({ ...jobData, slug: inserted.slug || jobSlug });
       } else {
         console.error(`Failed to insert job for ${jobData.company}:`, dbError);
       }
@@ -275,7 +286,7 @@ Note: If the Crawled Pages Context lacks explicit skills or responsibilities, in
     
     let formattedPost = `*📝 LATEST JOB OPENINGS | ${today}*\n\n`;
     insertedJobs.forEach((job) => {
-      const jobUrl = `${portalUrlBase}/jobs/${job.dbId}`;
+      const jobUrl = `${portalUrlBase}/jobs/${job.slug}`;
       formattedPost += `*🎯 ${job.company.toUpperCase()} IS HIRING*\n`;
       formattedPost += `Role: ${job.title}\n`;
       formattedPost += `Salary: ${job.salary}\n`;

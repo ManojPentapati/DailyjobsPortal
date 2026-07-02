@@ -4,6 +4,7 @@ import { Save, ArrowLeft } from "lucide-react";
 import AdminSidebar from "../../components/admin/AdminSidebar";
 import { useJobs } from "../../context/JobContext";
 import { categories } from "../../data/jobs";
+import { generateSlug } from "../../components/utils/slugUtils";
 
 const JOB_TYPES = ["Full-time", "Part-time", "Contract", "Internship", "Freelance"];
 const QUALIFICATIONS = ["B.Tech", "M.Tech", "BCA", "MCA", "B.Sc", "M.Sc", "B.Com", "BBA", "MBA", "Any Degree"];
@@ -165,7 +166,7 @@ export default function JobFormPage({ isEdit = false }) {
       if (isEdit) {
         await dispatch({ type: "UPDATE_JOB", payload: { ...jobData, id } });
       } else {
-        await dispatch({ type: "ADD_JOB", payload: jobData });
+        await dispatch({ type: "ADD_JOB", payload: { ...jobData, slug: generateSlug(jobData.company, jobData.title) } });
       }
       setSaved(true);
       setTimeout(() => navigate("/admin/dashboard"), 1500);

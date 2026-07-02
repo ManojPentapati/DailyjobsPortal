@@ -170,8 +170,15 @@ export function JobProvider({ children }) {
     }
   };
 
-  const getJobById = async (id) => {
-    const { data, error } = await supabase.from("jobs").select("*").eq("id", id).single();
+  const getJobById = async (idOrSlug) => {
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(idOrSlug);
+    let query = supabase.from("jobs").select("*");
+    if (isUuid) {
+      query = query.eq("id", idOrSlug);
+    } else {
+      query = query.eq("slug", idOrSlug);
+    }
+    const { data, error } = await query.single();
     if (error) {
       console.error("Error fetching job:", error);
       return null;

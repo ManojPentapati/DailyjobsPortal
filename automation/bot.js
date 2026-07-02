@@ -319,13 +319,19 @@ Note: If the Crawled Pages Context lacks explicit skills or responsibilities, in
 
     insertedJobs.forEach((job) => {
       const jobUrl = `${PORTAL_BASE_URL}/jobs/${job.slug}`;
-      formattedPost += `*🎯 ${job.company.toUpperCase()} IS HIRING*\n`;
-      formattedPost += `Role: ${job.title}\n`;
+      formattedPost += `*📢 ${job.company.toUpperCase()} IS HIRING! 🚀*\n`;
+      formattedPost += `▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n`;
+      formattedPost += `👨‍💻 *Role:* ${job.title}\n`;
+      formattedPost += `📍 *Location:* ${job.location || "Across India"}\n`;
+      formattedPost += `🎓 *Degree:* ${job.qualification || "Any Graduate"}\n`;
+      formattedPost += `💼 *Experience:* ${job.experience || "Freshers / Experienced"}\n`;
+      formattedPost += `🥇 *Batch:* ${job.passout_year || "Any"}\n`;
       if (job.salary) {
-        formattedPost += `Salary: ${job.salary}\n`;
+        formattedPost += `💰 *Salary:* ${job.salary}\n`;
       }
-      formattedPost += `*✅ Apply Link:*\n${jobUrl}\n`;
-      formattedPost += `*🔥 Apply as fast as possible!*\n\n`;
+      formattedPost += `▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n`;
+      formattedPost += `👉 *Apply Link:* ${jobUrl}\n`;
+      formattedPost += `⚠️ *Apply ASAP! Links expire fast.*\n\n\n`;
     });
 
     formattedPost += `*📢 Share this opportunity with your Friends and WhatsApp Group ❤️*`;

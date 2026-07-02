@@ -145,7 +145,8 @@ const fetchLogoUrl = async (companyName) => {
     console.error("Autocomplete logo fetch failed:", err.message);
   }
 
-  return `https://www.google.com/s2/favicons?sz=64&domain=${domain}`;
+  const cleanDomain = domain.replace(/^(https?:)?\/\//, "").trim();
+  return `https://www.google.com/s2/favicons?sz=64&domain=${cleanDomain}&fallback=sitemap`;
 };
 
 // Bot main handler

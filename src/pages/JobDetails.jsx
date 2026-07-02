@@ -9,7 +9,7 @@ import { useJobs } from "../context/JobContext";
 import JobCard from "../components/jobs/JobCard";
 import EmptyState from "../components/common/EmptyState";
 import { formatDate, formatDistanceToNow, isWithinHours } from "../components/utils/dateUtils";
-import { resolveLogo } from "../components/utils/logoUtils";
+import CompanyLogo from "../components/common/CompanyLogo";
 
 export default function JobDetails() {
   const { id } = useParams();
@@ -133,16 +133,11 @@ export default function JobDetails() {
           </button>
 
           <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-5">
-            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl overflow-hidden bg-white border-2 border-white/20 flex-shrink-0 flex items-center justify-center">
-              <img
-                src={resolveLogo(job.company_logo || job.logo)}
-                alt={job.company}
-                className="w-full h-full object-contain p-1"
-                onError={(e) => {
-                  e.currentTarget.parentElement.innerHTML = `<span class="text-slate-800 font-bold text-xl sm:text-2xl">${job.company[0]}</span>`;
-                }}
-              />
-            </div>
+            <CompanyLogo
+              logo={job.company_logo || job.logo}
+              company={job.company}
+              className="w-14 h-14 sm:w-16 sm:h-16"
+            />
             <div className="flex-1 min-w-0">
               <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-2">
                 {isNew && <span className="badge-new">✦ New</span>}
@@ -282,10 +277,11 @@ export default function JobDetails() {
             <div className="card-flat p-5">
               <h2 className="font-bold text-slate-900 dark:text-white mb-3">About {job.company}</h2>
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600">
-                  <img src={resolveLogo(job.company_logo || job.logo)} alt={job.company} className="w-full h-full object-contain p-1"
-                    onError={(e) => { e.currentTarget.parentElement.innerHTML = `<div class="w-full h-full flex items-center justify-center font-bold text-amber-600 dark:text-amber-400">${job.company[0]}</div>`; }} />
-                </div>
+                <CompanyLogo
+                  logo={job.company_logo || job.logo}
+                  company={job.company}
+                  className="w-10 h-10"
+                />
                 <div>
                   <p className="font-semibold text-slate-900 dark:text-white text-sm">{job.company}</p>
                   <p className="text-xs text-slate-400">{job.category}</p>

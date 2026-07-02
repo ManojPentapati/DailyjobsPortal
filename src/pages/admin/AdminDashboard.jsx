@@ -8,7 +8,7 @@ import {
 import AdminSidebar from "../../components/admin/AdminSidebar";
 import { useJobs } from "../../context/JobContext";
 import { formatDate } from "../../components/utils/dateUtils";
-import { resolveLogo } from "../../components/utils/logoUtils";
+import CompanyLogo from "../../components/common/CompanyLogo";
 import Modal from "../../components/common/Modal";
 
 function StatCard({ label, value, icon: Icon, color }) {
@@ -193,10 +193,11 @@ export default function AdminDashboard() {
                         <td className="px-4 py-3 text-slate-400 text-xs">{idx + 1}</td>
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-2.5">
-                            <div className="w-8 h-8 rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-700 flex-shrink-0 border border-slate-200 dark:border-slate-600">
-                              <img src={resolveLogo(job.company_logo || job.logo)} alt={job.company} className="w-full h-full object-contain p-0.5"
-                                onError={(e) => { e.currentTarget.parentElement.innerHTML = `<div class="w-full h-full flex items-center justify-center text-amber-600 dark:text-amber-400 text-xs font-bold">${job.company[0]}</div>`; }} />
-                            </div>
+                            <CompanyLogo
+                              logo={job.company_logo || job.logo}
+                              company={job.company}
+                              className="w-8 h-8"
+                            />
                             <div>
                               <p className="font-medium text-slate-900 dark:text-white text-sm">{job.title}</p>
                               <p className="text-xs text-slate-400">{job.category}</p>

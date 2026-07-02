@@ -5,7 +5,7 @@ import {
   Bookmark, BookmarkCheck, Building2, ArrowUpRight,
 } from "lucide-react";
 import { formatDistanceToNow, isWithinHours } from "../utils/dateUtils";
-import { resolveLogo } from "../utils/logoUtils";
+import CompanyLogo from "../common/CompanyLogo";
 
 export default function JobCard({ job, compact = false }) {
   const [saved, setSaved] = useState(() => {
@@ -33,19 +33,11 @@ export default function JobCard({ job, compact = false }) {
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-3 flex-1 min-w-0">
           {/* Logo */}
-          <div className="w-11 h-11 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-700/80 flex-shrink-0 ring-1 ring-slate-200 dark:ring-slate-600">
-            <img
-              src={resolveLogo(job.company_logo || job.logo)}
-              alt={job.company}
-              className="w-full h-full object-contain p-1.5"
-              onError={(e) => {
-                e.currentTarget.parentElement.style.display = "flex";
-                e.currentTarget.parentElement.style.alignItems = "center";
-                e.currentTarget.parentElement.style.justifyContent = "center";
-                e.currentTarget.parentElement.innerHTML = `<span class="text-amber-600 dark:text-amber-400 font-extrabold text-base">${job.company[0]}</span>`;
-              }}
-            />
-          </div>
+          <CompanyLogo
+            logo={job.company_logo || job.logo}
+            company={job.company}
+            className="w-11 h-11"
+          />
           <div className="flex-1 min-w-0">
             <h3 className="font-semibold text-slate-900 dark:text-white text-sm leading-snug group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors duration-200 line-clamp-1">
               {job.title}

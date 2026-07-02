@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Zap, ArrowRight, Clock, MapPin } from "lucide-react";
 import { supabase } from "../../lib/supabase";
 import { formatDistanceToNow } from "../utils/dateUtils";
-import { resolveLogo } from "../utils/logoUtils";
+import CompanyLogo from "../common/CompanyLogo";
 
 export default function TodaysJobs() {
   const [todaysJobs, setTodaysJobs] = useState([]);
@@ -61,12 +61,11 @@ export default function TodaysJobs() {
               style={{ animationDelay: `${idx * 40}ms` }}
             >
               {/* Logo */}
-              <div className="w-11 h-11 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-700 flex-shrink-0 ring-1 ring-slate-200 dark:ring-slate-600">
-                <img src={resolveLogo(job.company_logo || job.logo)} alt={job.company} className="w-full h-full object-contain p-1.5"
-                  onError={(e) => {
-                    e.currentTarget.parentElement.innerHTML = `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px" class="text-amber-600 dark:text-amber-400">${job.company[0]}</div>`;
-                  }} />
-              </div>
+              <CompanyLogo
+                logo={job.company_logo || job.logo}
+                company={job.company}
+                className="w-11 h-11"
+              />
 
               {/* Info */}
               <div className="flex-1 min-w-0">

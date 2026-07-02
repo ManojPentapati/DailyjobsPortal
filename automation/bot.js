@@ -22,6 +22,7 @@ const {
   SUPABASE_SERVICE_ROLE_KEY,
   PORTAL_BASE_URL = "http://localhost:5173",
   ALLOWED_USER_IDS = "",
+  TELEGRAM_CHANNEL_ID = "",
 } = process.env;
 
 // Validate config
@@ -341,6 +342,16 @@ Note: If the Crawled Pages Context lacks explicit skills or responsibilities, in
     await bot.deleteMessage(chatId, statusMsg.message_id);
     await bot.sendMessage(chatId, `✅ *Successfully posted ${insertedJobs.length} job(s) to website!*\n\nHere is your ready-to-use publication post (tap to copy):`);
     await bot.sendMessage(chatId, `\`\`\`\n${formattedPost.trim()}\n\`\`\``, { parse_mode: "Markdown" });
+
+    // Auto-broadcast to Telegram channel if configured
+    if (TELEGRAM_CHANNEL_ID) {
+      try {
+        await bot.sendMessage(TELEGRAM_CHANNEL_ID, formattedPost, { parse_mode: "Markdown" });
+      } catch (err) {
+        console.error("Auto-broadcast failed:", err.message);
+        await bot.sendMessage(chatId, `⚠️ *Warning:* Failed to auto-broadcast to your channel (${TELEGRAM_CHANNEL_ID}).\n\n*Solution:* Make sure the bot is added as an **Administrator** in your channel, and has permission to post messages!`);
+      }
+    }
 
     // Delete the user's original forwarded message to keep the chat clean
     try {

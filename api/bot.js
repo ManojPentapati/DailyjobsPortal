@@ -11,6 +11,7 @@ const {
   VITE_SUPABASE_ANON_KEY,
   SUPABASE_SERVICE_ROLE_KEY,
   ALLOWED_USER_IDS = "",
+  TELEGRAM_CHANNEL_ID = "",
 } = process.env;
 
 const allowedIds = ALLOWED_USER_IDS.split(",").map((id) => id.trim()).filter(Boolean);
@@ -306,6 +307,17 @@ Note: If the Crawled Pages Context lacks explicit skills or responsibilities, in
 
     // 4. Send final template response and delete original message to keep chat clean
     await sendTelegramMessage(chatId, `✅ *Successfully posted ${insertedJobs.length} job(s) to website!*\n\nHere is your ready-to-use publication post (tap to copy):\n\n\`\`\`\n${formattedPost.trim()}\n\`\`\``);
+
+    // Auto-broadcast to Telegram channel if configured
+    if (TELEGRAM_CHANNEL_ID) {
+      try {
+        await sendTelegramMessage(TELEGRAM_CHANNEL_ID, formattedPost);
+      } catch (err) {
+        console.error("Auto-broadcast failed:", err.message);
+        await sendTelegramMessage(chatId, `⚠️ *Warning:* Failed to auto-broadcast to your channel (${TELEGRAM_CHANNEL_ID}).\n\n*Solution:* Make sure the bot is added as an **Administrator** in your channel, and has permission to post messages!`);
+      }
+    }
+
     await deleteTelegramMessage(chatId, messageId);
 
   } catch (error) {

@@ -1,0 +1,296 @@
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import { createClient } from "@supabase/supabase-js";
+import axios from "axios";
+import * as cheerio from "cheerio";
+
+// Initialize environment variables from Vercel
+const {
+  TELEGRAM_BOT_TOKEN,
+  GEMINI_API_KEY,
+  VITE_SUPABASE_URL,
+  VITE_SUPABASE_ANON_KEY,
+  SUPABASE_SERVICE_ROLE_KEY,
+  ALLOWED_USER_IDS = "",
+} = process.env;
+
+const allowedIds = ALLOWED_USER_IDS.split(",").map((id) => id.trim()).filter(Boolean);
+
+// Initialize Clients
+const ai = new GoogleGenerativeAI(GEMINI_API_KEY || "");
+const supabaseKey = SUPABASE_SERVICE_ROLE_KEY || VITE_SUPABASE_ANON_KEY || "";
+const supabase = createClient(VITE_SUPABASE_URL || "", supabaseKey);
+
+// Helper: Extract all unique URLs from text, ignoring generic social links
+function extractUrls(text) {
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const matches = text.match(urlRegex) || [];
+  
+  const ignorePatterns = [
+    "t.me", "telegram.me", "wa.me", "whatsapp.com", "instagram.com", 
+    "facebook.com", "linkedin.com", "twitter.com", "x.com", "youtube.com"
+  ];
+
+  const filtered = matches.filter((url) => {
+    return !ignorePatterns.some((pattern) => url.toLowerCase().includes(pattern));
+  });
+
+  return [...new Set(filtered)];
+}
+
+// Helper: Crawl webpage and extract text content
+async function crawlWebpage(url) {
+  try {
+    const { data } = await axios.get(url, {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+      },
+      timeout: 10000,
+    });
+    const $ = cheerio.load(data);
+
+    // Remove script and style elements
+    $("script, style, iframe, noscript, header, footer, nav").remove();
+
+    // Extract text content and links
+    const textContent = $("body").text().replace(/\s+/g, " ").trim();
+    const links = [];
+    $("a[href]").each((i, el) => {
+      const href = $(el).attr("href");
+      const linkText = $(el).text().trim();
+      if (href && href.startsWith("http")) {
+        links.push({ text: linkText, url: href });
+      }
+    });
+
+    return {
+      url,
+      text: textContent.substring(0, 8000),
+      links: links.slice(0, 30),
+    };
+  } catch (error) {
+    console.error(`Failed to crawl url ${url}:`, error.message);
+    return { url, text: "", links: [], error: error.message };
+  }
+}
+
+// Helper: Resolve logo URL
+const fetchLogoUrl = async (companyName) => {
+  const companyDomains = {
+    google: "google.com", microsoft: "microsoft.com", amazon: "amazon.com",
+    apple: "apple.com", facebook: "facebook.com", meta: "meta.com",
+    netflix: "netflix.com", tcs: "tcs.com", infosys: "infosys.com",
+    wipro: "wipro.com", cognizant: "cognizant.com", accenture: "accenture.com",
+    flipkart: "flipkart.com", zomato: "zomato.com", swiggy: "swiggy.com",
+    ola: "olaweb.com", uber: "uber.com", paytm: "paytm.com",
+    reliance: "reliance.com", jio: "jio.com", hcl: "hcltech.com",
+    techmahindra: "techmahindra.com", nttdata: "nttdata.com",
+  };
+
+  const normalized = companyName.toLowerCase().trim().replace(/[^a-z0-9]/g, "");
+  let domain = companyDomains[normalized] || `${companyName.toLowerCase().trim().replace(/\s+/g, "")}.com`;
+
+  try {
+    const res = await axios.get(`https://autocomplete.clearbit.com/v1/companies/suggest?query=${encodeURIComponent(companyName)}`, { timeout: 3000 });
+    if (res.data && res.data.length > 0 && res.data[0].logo) {
+      const logo = res.data[0].logo;
+      if (logo.includes("logo.clearbit.com/")) {
+        domain = logo.split("logo.clearbit.com/")[1] || domain;
+      } else if (res.data[0].domain) {
+        domain = res.data[0].domain;
+      }
+    }
+  } catch (err) {
+    console.error("Autocomplete logo fetch failed:", err.message);
+  }
+
+  return `https://www.google.com/s2/favicons?sz=64&domain=${domain}`;
+};
+
+// Helper: Send message to Telegram
+async function sendTelegramMessage(chatId, text, replyToMessageId = null, replyMarkup = null) {
+  const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+  const data = {
+    chat_id: chatId,
+    text: text,
+    parse_mode: "Markdown",
+  };
+  if (replyToMessageId) data.reply_to_message_id = replyToMessageId;
+  if (replyMarkup) data.reply_markup = replyMarkup;
+  await axios.post(url, data);
+}
+
+// Helper: Delete message on Telegram
+async function deleteTelegramMessage(chatId, messageId) {
+  try {
+    const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/deleteMessage`;
+    await axios.post(url, { chat_id: chatId, message_id: messageId });
+  } catch (e) {
+    console.warn("Could not delete message:", e.message);
+  }
+}
+
+// Vercel Serverless Function Handler
+export default async function handler(req, res) {
+  // Verify request is POST (from Telegram Webhook)
+  if (req.method !== "POST") {
+    return res.status(200).send("Bot is active.");
+  }
+
+  const { message } = req.body;
+  if (!message) {
+    return res.status(200).send("No message received.");
+  }
+
+  const chatId = message.chat.id;
+  const userId = message.from?.id?.toString() || "";
+  const text = message.text || message.caption || "";
+  const messageId = message.message_id;
+
+  // Authorization Check
+  if (allowedIds.length && !allowedIds.includes(userId)) {
+    await sendTelegramMessage(chatId, `❌ Unauthorized. Your Telegram User ID is: ${userId}\nTo gain access, add this ID to ALLOWED_USER_IDS in Vercel.`, messageId);
+    return res.status(200).send("Unauthorized.");
+  }
+
+  // Handle start command
+  if (text.startsWith("/start")) {
+    await sendTelegramMessage(chatId, "👋 Welcome to the *Daily Jobs Portal Aggregator Bot* (Vercel Webhook Mode)!\n\nForward any job posting message containing links to wrapper sites, and I will crawl the links, extract details using Gemini, post to Supabase, and give you the WhatsApp template instantly!");
+    return res.status(200).send("Start command handled.");
+  }
+
+  const urls = extractUrls(text);
+  if (urls.length === 0) {
+    await sendTelegramMessage(chatId, "⚠️ Please send or forward a message that contains links to the job listings.", messageId);
+    return res.status(200).send("No URLs found.");
+  }
+
+  // Send an initial processing notice (which we will delete later)
+  // Telegram requires us to track this message's ID to delete or update it later
+  // Let's create a webhook workflow. Since Vercel executes serverless, we must respond within 15 seconds.
+  // We will run the crawl and Gemini in this serverless context.
+  try {
+    // 1. Crawl all webpages in parallel
+    const crawlResults = await Promise.all(urls.map((url) => crawlWebpage(url)));
+    const validCrawls = crawlResults.filter((r) => r.text || r.links.length > 0);
+
+    if (validCrawls.length === 0) {
+      await sendTelegramMessage(chatId, `❌ Failed to crawl any of the links provided: ${urls.join(", ")}`, messageId);
+      return res.status(200).send("Crawl failed.");
+    }
+
+    // 2. Query Gemini
+    const model = ai.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const prompt = `
+You are a job parser AI. Your task is to analyze a raw job post message and the text/links crawled from its linked landing pages.
+The message contains multiple job listings. Your goal is to map each job to its crawled page context and extract the details.
+For each job, locate the REAL official application link (like a Google Form, Workday, Lever, Greenhouse, or the company's official career portal) on its respective crawled landing page.
+
+Raw Message:
+"""
+${text}
+"""
+
+Crawled Pages Context:
+${JSON.stringify(validCrawls, null, 2)}
+
+Respond with a raw JSON array of job objects matching the exact schema below. Do not wrap in markdown code blocks or any other tags.
+[
+  {
+    "title": "Job Title (e.g. System Engineer / Specialist Programmer)",
+    "company": "Company Name (e.g. Infosys)",
+    "location": "Job Location (e.g. Chennai, Bangalore or Across India)",
+    "experience": "Experience Requirement (e.g. Freshers, 0-2 years)",
+    "salary": "Salary (e.g. Rs. 6.25 - 21 LPA or Upto 8 LPA)",
+    "category": "One of these exact categories: Software Development, Data Science, AI / ML, Testing / QA, Cloud Computing, Cyber Security, UI/UX Design, DevOps & Cloud, Product Management, Design",
+    "description": "Full job description (1-2 paragraphs summarizing the role details, responsibilities, and requirements)",
+    "skills": ["Skill1", "Skill2", "Skill3"],
+    "responsibilities": ["Responsibility1", "Responsibility2", "Responsibility3"],
+    "qualification": "Highly concise qualification label (e.g. B.E/B.Tech, MCA, B.Sc, BCA, Any Degree, BBA, MBA, M.Tech). Do NOT write a sentence. Keep it to a clean, simple short label.",
+    "passout_year": "Comma separated years (e.g. 2024, 2025, 2026). If open to any, say Any",
+    "job_type": "One of: Full-time, Part-time, Contract, Internship, Freelance",
+    "apply_link": "The REAL official apply link found on its corresponding crawled page (e.g. a docs.google.com/forms link or infosys.com career link). Do NOT use the wrapper link. If not found, output the best alternative from the crawled page."
+  }
+]
+
+Note: If the Crawled Pages Context lacks explicit skills or responsibilities, infer a logical list of 3-5 key skills and responsibilities based on the job title and company. Never leave them empty.
+`;
+
+    const result = await model.generateContent(prompt);
+    let responseText = result.response.text().trim();
+    
+    if (responseText.startsWith("```")) {
+      responseText = responseText.replace(/^```json/, "").replace(/```$/, "").trim();
+    }
+
+    const jobsData = JSON.parse(responseText);
+    
+    if (!Array.isArray(jobsData)) {
+      throw new Error("Gemini did not return an array of job listings.");
+    }
+
+    const insertedJobs = [];
+
+    // Loop through each job and save to Supabase
+    for (const jobData of jobsData) {
+      const logoUrl = await fetchLogoUrl(jobData.company);
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 30);
+
+      const { data: inserted, error: dbError } = await supabase
+        .from("jobs")
+        .insert({
+          title: jobData.title,
+          company: jobData.company,
+          company_logo: logoUrl,
+          location: jobData.location,
+          experience: jobData.experience,
+          salary: jobData.salary,
+          category: jobData.category,
+          description: jobData.description,
+          skills: jobData.skills || [],
+          responsibilities: jobData.responsibilities || [],
+          qualification: jobData.qualification,
+          passout_year: jobData.passout_year,
+          job_type: jobData.job_type,
+          apply_link: jobData.apply_link,
+          is_active: true,
+          is_featured: false,
+          expires_at: expiresAt.toISOString(),
+        })
+        .select()
+        .single();
+
+      if (!dbError && inserted) {
+        insertedJobs.push({ ...jobData, dbId: inserted.id });
+      } else {
+        console.error(`Failed to insert job for ${jobData.company}:`, dbError);
+      }
+    }
+
+    // 3. Format final publication template
+    const today = new Date().toLocaleDateString("en-US", { day: "numeric", month: "long", year: "numeric" }).toUpperCase();
+    
+    // Resolve frontend URL base
+    const portalUrlBase = req.headers.origin || `https://${req.headers.host}`;
+    
+    let formattedPost = `*📝 LATEST JOB OPENINGS | ${today}*\n\n`;
+    insertedJobs.forEach((job) => {
+      const jobUrl = `${portalUrlBase}/jobs/${job.dbId}`;
+      formattedPost += `*🎯 ${job.company.toUpperCase()} IS HIRING*\n`;
+      formattedPost += `Role: ${job.title}\n`;
+      formattedPost += `Salary: ${job.salary}\n`;
+      formattedPost += `*✅ Apply Link:*\n${jobUrl}\n\n`;
+    });
+    formattedPost += `*📢 Share this opportunity with your Friends and WhatsApp Group ❤️*`;
+
+    // 4. Send final template response and delete original message to keep chat clean
+    await sendTelegramMessage(chatId, `✅ *Successfully posted ${insertedJobs.length} job(s) to website!*\n\nHere is your ready-to-use publication post (tap to copy):\n\n\`\`\`\n${formattedPost.trim()}\n\`\`\``);
+    await deleteTelegramMessage(chatId, messageId);
+
+  } catch (error) {
+    console.error("Webhook processing error:", error);
+    await sendTelegramMessage(chatId, `❌ *Failed to complete automation.*\n\n*Error:* ${error.message}`, messageId);
+  }
+
+  return res.status(200).send("Done.");
+}

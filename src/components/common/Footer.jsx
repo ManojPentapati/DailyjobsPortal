@@ -6,6 +6,7 @@ const quickLinks = [
   { to: "/jobs", label: "Browse Jobs" },
   { to: "/categories", label: "Categories" },
   { to: "/contact", label: "Contact" },
+  { to: "/privacy", label: "Privacy Policy" },
   { to: "/admin/login", label: "Admin Panel" },
 ];
 

@@ -6,8 +6,8 @@ import { supabase } from "../../lib/supabase";
 // Static options that don't change based on data
 const STATIC_JOB_TYPES = ["Full-time", "Part-time", "Contract", "Internship", "Freelance"];
 
-function FilterSection({ section, selected, onToggle, loading }) {
-  const [open, setOpen] = useState(false);
+function FilterSection({ section, selected, onToggle, loading, initialOpen = false }) {
+  const [open, setOpen] = useState(initialOpen);
 
   return (
     <div className="border-b border-slate-100 dark:border-slate-700 pb-4 mb-4 last:border-0 last:mb-0 last:pb-0">
@@ -166,6 +166,7 @@ export default function FilterSidebar({ onClose }) {
           selected={filters[section.key] || []}
           onToggle={handleToggle}
           loading={loading && section.key !== "type"}
+          initialOpen={["location", "experience", "type"].includes(section.key)}
         />
       ))}
     </aside>

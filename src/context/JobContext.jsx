@@ -41,7 +41,7 @@ export function JobProvider({ children }) {
     // Filters
     if (state.filters.location.length) q = q.in("location", state.filters.location);
     if (state.filters.experience.length) q = q.in("experience", state.filters.experience);
-    // if (state.filters.type.length) q = q.in("type", state.filters.type); // type isn't in our schema directly, assume category or metadata, but for now ignoring if not in schema
+    if (state.filters.type.length) q = q.in("job_type", state.filters.type);
     if (state.filters.category.length) q = q.in("category", state.filters.category);
     if (state.filters.company.length) q = q.in("company", state.filters.company);
     if (state.filters.qualification?.length) q = q.in("qualification", state.filters.qualification);

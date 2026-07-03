@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, Fragment } from "react";
 import { useSearchParams } from "react-router-dom";
 import { SlidersHorizontal, X, ArrowUpDown } from "lucide-react";
 import { useJobs } from "../context/JobContext";
@@ -8,6 +8,7 @@ import Pagination from "../components/common/Pagination";
 import EmptyState from "../components/common/EmptyState";
 import LoadingSkeleton from "../components/common/LoadingSkeleton";
 import SearchBar from "../components/common/SearchBar";
+import AdSlot from "../components/common/AdSlot";
 
 const SORT_OPTIONS = [
   { value: "latest", label: "Latest First" },
@@ -154,8 +155,13 @@ export default function JobListings() {
               />
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
-                {paginatedJobs.map((job) => (
-                  <JobCard key={job.id} job={job} />
+                {paginatedJobs.map((job, idx) => (
+                  <Fragment key={job.id}>
+                    <JobCard job={job} />
+                    {(idx + 1) % 6 === 0 && (
+                      <AdSlot slot="feed-native" className="col-span-1" style={{ minHeight: "160px" }} />
+                    )}
+                  </Fragment>
                 ))}
               </div>
             )}

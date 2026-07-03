@@ -10,6 +10,7 @@ import JobCard from "../components/jobs/JobCard";
 import EmptyState from "../components/common/EmptyState";
 import { formatDate, formatDistanceToNow, isWithinHours } from "../components/utils/dateUtils";
 import CompanyLogo from "../components/common/CompanyLogo";
+import AdSlot from "../components/common/AdSlot";
 
 export default function JobDetails() {
   const { id } = useParams();
@@ -299,6 +300,8 @@ export default function JobDetails() {
             >
               Apply for This Position
             </button>
+
+            <AdSlot slot="details-sidebar" className="mt-4" />
           </div>
         </div>
 

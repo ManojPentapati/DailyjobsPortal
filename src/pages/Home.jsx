@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import HeroSection from "../components/home/HeroSection";
 import HowItWorks from "../components/home/HowItWorks";
 import CategoriesSection from "../components/home/CategoriesSection";
+import NewsletterSection from "../components/home/NewsletterSection";
 
 export default function Home() {
   useEffect(() => {
@@ -13,6 +14,7 @@ export default function Home() {
       <HeroSection />
       <HowItWorks />
       <CategoriesSection />
+      <NewsletterSection />
     </main>
   );
 }

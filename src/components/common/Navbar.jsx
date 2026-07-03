@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { Briefcase, Search, Menu, X, Sun, Moon } from "lucide-react";
+import { Briefcase, Search, Menu, X } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
 import { useJobs } from "../../context/JobContext";
 
@@ -99,12 +99,7 @@ export default function Navbar() {
                 <Search className="w-5 h-5" />
               </button>
 
-              {/* Theme */}
-              <button onClick={toggleTheme} className="p-2 rounded-xl text-stone-500 dark:text-slate-400 hover:text-stone-900 dark:hover:text-white hover:bg-stone-100 dark:hover:bg-white/10 transition-all" aria-label="Toggle theme" id="nav-theme-toggle">
-                {isDark
-                  ? <Sun className="w-5 h-5" style={{ color: "#FF9900" }} />
-                  : <Moon className="w-5 h-5 text-stone-500" />}
-              </button>
+
 
               {/* Admin CTA */}
               <Link to="/admin/login" className="hidden sm:flex btn-primary text-xs py-2 px-4" id="nav-admin-btn">

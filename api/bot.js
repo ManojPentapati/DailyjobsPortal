@@ -295,32 +295,53 @@ Note: If the Crawled Pages Context lacks explicit skills or responsibilities, in
     // Resolve frontend URL base
     const portalUrlBase = req.headers.origin || `https://${req.headers.host}`;
     
-    let formattedPost = `<b>📝 LATEST JOB OPENINGS | ${today}</b>\n\n`;
+    // 1. Build WhatsApp version (using * for bold, no HTML tags)
+    let whatsAppPost = `*📝 LATEST JOB OPENINGS | ${today}*\n\n`;
     insertedJobs.forEach((job) => {
       const jobUrl = `${portalUrlBase}/jobs/${job.slug}`;
-      formattedPost += `🌟 <b>${escapeHtml(job.company.toUpperCase())} IS HIRING!</b> 🌟\n`;
-      formattedPost += `━━━━━━━━━━━━━━━━━━━━\n`;
-      formattedPost += `  ◈ <b>Role:</b> ${escapeHtml(job.title)}\n`;
-      formattedPost += `  ◈ <b>Location:</b> ${escapeHtml(job.location || "Across India")}\n`;
-      formattedPost += `  ◈ <b>Degree:</b> ${escapeHtml(job.qualification || "Any Graduate")}\n`;
-      formattedPost += `  ◈ <b>Experience:</b> ${escapeHtml(job.experience || "Freshers / Experienced")}\n`;
-      formattedPost += `  ◈ <b>Batch:</b> ${escapeHtml(job.passout_year || "Any")}\n`;
+      whatsAppPost += `🌟 *${job.company.toUpperCase()} IS HIRING!* 🌟\n`;
+      whatsAppPost += `━━━━━━━━━━━━━━━━━━━━\n`;
+      whatsAppPost += `  ◈ *Role:* ${job.title}\n`;
+      whatsAppPost += `  ◈ *Location:* ${job.location || "Across India"}\n`;
+      whatsAppPost += `  ◈ *Degree:* ${job.qualification || "Any Graduate"}\n`;
+      whatsAppPost += `  ◈ *Experience:* ${job.experience || "Freshers / Experienced"}\n`;
+      whatsAppPost += `  ◈ *Batch:* ${job.passout_year || "Any"}\n`;
       if (job.salary) {
-        formattedPost += `  ◈ <b>Package:</b> ${escapeHtml(job.salary)}\n`;
+        whatsAppPost += `  ◈ *Package:* ${job.salary}\n`;
       }
-      formattedPost += `━━━━━━━━━━━━━━━━━━━━\n`;
-      formattedPost += `🚀 <b>Apply Link:</b> ${jobUrl}\n`;
-      formattedPost += `⏰ <b>Apply ASAP! Link can expire anytime.</b>\n\n\n`;
+      whatsAppPost += `━━━━━━━━━━━━━━━━━━━━\n`;
+      whatsAppPost += `🚀 *Apply Link:* ${jobUrl}\n`;
+      whatsAppPost += `⏰ *Apply ASAP! Link can expire anytime.*\n\n\n`;
     });
-    formattedPost += `<b>📢 Share this opportunity with your Friends and WhatsApp Group ❤️</b>`;
+    whatsAppPost += `*📢 Share this opportunity with your Friends and WhatsApp Group ❤️*`;
+
+    // 2. Build Telegram Channel version (using <b> for bold)
+    let channelPost = `<b>📝 LATEST JOB OPENINGS | ${today}</b>\n\n`;
+    insertedJobs.forEach((job) => {
+      const jobUrl = `${portalUrlBase}/jobs/${job.slug}`;
+      channelPost += `🌟 <b>${escapeHtml(job.company.toUpperCase())} IS HIRING!</b> 🌟\n`;
+      channelPost += `━━━━━━━━━━━━━━━━━━━━\n`;
+      channelPost += `  ◈ <b>Role:</b> ${escapeHtml(job.title)}\n`;
+      channelPost += `  ◈ <b>Location:</b> ${escapeHtml(job.location || "Across India")}\n`;
+      channelPost += `  ◈ <b>Degree:</b> ${escapeHtml(job.qualification || "Any Graduate")}\n`;
+      channelPost += `  ◈ <b>Experience:</b> ${escapeHtml(job.experience || "Freshers / Experienced")}\n`;
+      channelPost += `  ◈ <b>Batch:</b> ${escapeHtml(job.passout_year || "Any")}\n`;
+      if (job.salary) {
+        channelPost += `  ◈ <b>Package:</b> ${escapeHtml(job.salary)}\n`;
+      }
+      channelPost += `━━━━━━━━━━━━━━━━━━━━\n`;
+      channelPost += `🚀 <b>Apply Link:</b> ${jobUrl}\n`;
+      channelPost += `⏰ <b>Apply ASAP! Link can expire anytime.</b>\n\n\n`;
+    });
+    channelPost += `<b>📢 Share this opportunity with your Friends and WhatsApp Group ❤️</b>`;
 
     // 4. Send final template response and delete original message to keep chat clean
-    await sendTelegramMessage(chatId, `✅ <b>Successfully posted ${insertedJobs.length} job(s) to website!</b>\n\nHere is your ready-to-use publication post (tap to copy):\n\n<pre>${escapeHtml(formattedPost.trim())}</pre>`);
+    await sendTelegramMessage(chatId, `✅ <b>Successfully posted ${insertedJobs.length} job(s) to website!</b>\n\nHere is your ready-to-use publication post (tap to copy):\n\n<pre>${escapeHtml(whatsAppPost.trim())}</pre>`);
 
     // Auto-broadcast to Telegram channel if configured
     if (TELEGRAM_CHANNEL_ID) {
       try {
-        await sendTelegramMessage(TELEGRAM_CHANNEL_ID, formattedPost);
+        await sendTelegramMessage(TELEGRAM_CHANNEL_ID, channelPost);
       } catch (err) {
         console.error("Auto-broadcast failed:", err.message);
         await sendTelegramMessage(chatId, `⚠️ <b>Warning:</b> Failed to auto-broadcast to your channel (${TELEGRAM_CHANNEL_ID}).\n\n<b>Solution:</b> Make sure the bot is added as an <b>Administrator</b> in your channel, and has permission to post messages!`);

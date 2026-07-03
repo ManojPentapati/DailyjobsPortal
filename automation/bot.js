@@ -210,7 +210,7 @@ bot.on("message", async (msg) => {
 
   // 2. Query Gemini
   try {
-    const model = ai.getGenerativeModel({ model: "gemini-flash-latest" });
+    const model = ai.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
 
     const prompt = `
 You are a job parser AI. Your task is to analyze a raw job post message and the text/links crawled from its linked landing pages.

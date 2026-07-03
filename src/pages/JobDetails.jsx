@@ -132,12 +132,56 @@ export default function JobDetails() {
     setShowShareMenu(false);
   };
 
+  const [showRedirectModal, setShowRedirectModal] = useState(false);
+  const [countdown, setCountdown] = useState(3);
+  const [redirectInterval, setRedirectInterval] = useState(null);
+
   const handleApplyRedirect = () => {
+    if (!job?.apply_link) {
+      alert("Official application link is not available for this job.");
+      return;
+    }
+
+    // Clear any existing interval
+    if (redirectInterval) {
+      clearInterval(redirectInterval);
+    }
+
+    setCountdown(3);
+    setShowRedirectModal(true);
+
+    let count = 3;
+    const interval = setInterval(() => {
+      count -= 1;
+      setCountdown(count);
+      if (count <= 0) {
+        clearInterval(interval);
+        setShowRedirectModal(false);
+        setRedirectInterval(null);
+        window.open(job.apply_link, "_blank", "noopener,noreferrer");
+      }
+    }, 1000);
+
+    setRedirectInterval(interval);
+  };
+
+  const skipRedirect = () => {
+    if (redirectInterval) {
+      clearInterval(redirectInterval);
+      setRedirectInterval(null);
+    }
+    setShowRedirectModal(false);
     if (job?.apply_link) {
       window.open(job.apply_link, "_blank", "noopener,noreferrer");
-    } else {
-      alert("Official application link is not available for this job.");
     }
+  };
+
+  const cancelRedirect = () => {
+    if (redirectInterval) {
+      clearInterval(redirectInterval);
+      setRedirectInterval(null);
+    }
+    setShowRedirectModal(false);
   };
 
   return (
@@ -337,6 +381,63 @@ export default function JobDetails() {
           </div>
         )}
       </div>
+
+      {/* Safe Apply Redirection Modal */}
+      {showRedirectModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-fade-in" id="safe-apply-modal">
+          <div className="relative w-full max-w-md bg-white dark:bg-stone-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl animate-scale-up">
+            {/* Logo area */}
+            <div className="flex items-center gap-3 mb-6">
+              <CompanyLogo
+                logo={job.company_logo || job.logo}
+                company={job.company}
+                className="w-10 h-10"
+              />
+              <div>
+                <h3 className="font-extrabold text-stone-900 dark:text-white text-base">Applying for {job.company}</h3>
+                <p className="text-xs text-stone-400 dark:text-slate-500">Redirecting to official application</p>
+              </div>
+            </div>
+
+            {/* Countdown animation */}
+            <div className="flex flex-col items-center justify-center my-6">
+              <div className="relative w-16 h-16 rounded-full border-4 border-slate-100 dark:border-slate-800 flex items-center justify-center">
+                <div className="absolute inset-0 rounded-full border-4 border-amber-500 border-t-transparent animate-spin" />
+                <span className="text-xl font-black text-amber-600 dark:text-amber-400">{countdown}</span>
+              </div>
+              <p className="text-xs text-stone-400 dark:text-slate-500 mt-3">Establishing secure redirect...</p>
+            </div>
+
+            {/* Safety Alert card */}
+            <div className="p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-900/30 rounded-2xl mb-6">
+              <div className="flex gap-2.5">
+                <span className="text-base flex-shrink-0">⚠️</span>
+                <div className="text-xs leading-relaxed text-amber-800 dark:text-amber-400">
+                  <strong>Important Notice:</strong> Daily Jobs Portal never charges candidates any fees. If this application or anyone asks you to pay money to get a job offer, it is a scam.
+                </div>
+              </div>
+            </div>
+
+            {/* Button Actions */}
+            <div className="flex items-center gap-3">
+              <button
+                onClick={cancelRedirect}
+                className="flex-1 py-3 px-4 rounded-xl border border-stone-200 dark:border-slate-800 hover:bg-stone-50 dark:hover:bg-slate-800 text-stone-500 dark:text-slate-400 font-semibold text-sm transition-colors"
+                id="cancel-redirect-btn"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={skipRedirect}
+                className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-semibold text-sm shadow-md hover:shadow-lg transition-all"
+                id="skip-redirect-btn"
+              >
+                Apply Now
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

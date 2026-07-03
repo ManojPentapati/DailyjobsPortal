@@ -116,6 +116,15 @@ async function crawlWebpage(url) {
   }
 }
 
+// Helper: Escape HTML special characters
+function escapeHtml(text) {
+  if (!text) return "";
+  return String(text)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
 // Helper: Resolve logo URL
 const fetchLogoUrl = async (companyName) => {
   const companyDomains = {
@@ -158,15 +167,15 @@ bot.on("message", async (msg) => {
 
   // Authorization Check
   if (allowedIds.length && !allowedIds.includes(userId)) {
-    return bot.sendMessage(chatId, `❌ Unauthorized. Your Telegram User ID is: ${userId}\nTo gain access, add this ID to ALLOWED_USER_IDS in your .env file.`);
+    return bot.sendMessage(chatId, `❌ Unauthorized. Your Telegram User ID is: <b>${userId}</b>\nTo gain access, add this ID to ALLOWED_USER_IDS in your .env file.`, { parse_mode: "HTML" });
   }
 
   // Handle start command
   if (text.startsWith("/start")) {
     return bot.sendMessage(
       chatId,
-      "👋 Welcome to the *Daily Jobs Portal Aggregator Bot*!\n\nForward any job posting message (containing one or multiple links to job wrapper sites) here, and I will:\n1. Scrape all wrapper sites\n2. Extract all real apply links\n3. Use AI to structure all job details in parallel\n4. Post them to Supabase\n5. Give you the final formatted message containing all jobs ready to copy to WhatsApp!",
-      { parse_mode: "Markdown" }
+      "👋 Welcome to the <b>Daily Jobs Portal Aggregator Bot</b>!\n\nForward any job posting message (containing one or multiple links to job wrapper sites) here, and I will:\n1. Scrape all wrapper sites\n2. Extract all real apply links\n3. Use AI to structure all job details in parallel\n4. Post them to Supabase\n5. Give you the final formatted message containing all jobs ready to copy to WhatsApp!",
+      { parse_mode: "HTML" }
     );
   }
 
@@ -178,8 +187,8 @@ bot.on("message", async (msg) => {
 
   const statusMsg = await bot.sendMessage(
     chatId,
-    `⏳ *Step 1/4:* Crawling ${urls.length} webpage(s) in parallel to find official apply links...`,
-    { parse_mode: "Markdown" }
+    `⏳ <b>Step 1/4:</b> Crawling ${urls.length} webpage(s) in parallel to find official apply links...`,
+    { parse_mode: "HTML" }
   );
 
   // 1. Crawl all webpages in parallel
@@ -187,16 +196,16 @@ bot.on("message", async (msg) => {
   const validCrawls = crawlResults.filter((r) => r.text || r.links.length > 0);
 
   if (validCrawls.length === 0) {
-    return bot.editMessageText(`❌ Failed to crawl any of the links provided: ${urls.join(", ")}`, {
+    return bot.editMessageText(`❌ Failed to crawl any of the links provided: ${escapeHtml(urls.join(", "))}`, {
       chat_id: chatId,
       message_id: statusMsg.message_id,
     });
   }
 
-  await bot.editMessageText(`🤖 *Step 2/4:* Asking Gemini to structure details and extract real apply links for ${validCrawls.length} job(s)...`, {
+  await bot.editMessageText(`🤖 <b>Step 2/4:</b> Asking Gemini to structure details and extract real apply links for ${validCrawls.length} job(s)...`, {
     chat_id: chatId,
     message_id: statusMsg.message_id,
-    parse_mode: "Markdown",
+    parse_mode: "HTML",
   });
 
   // 2. Query Gemini
@@ -252,10 +261,10 @@ Note: If the Crawled Pages Context lacks explicit skills or responsibilities, in
       throw new Error("Gemini did not return an array of job listings.");
     }
 
-    await bot.editMessageText(`💾 *Step 3/4:* Resolving company logos and saving ${jobsData.length} job(s) to Supabase...`, {
+    await bot.editMessageText(`💾 <b>Step 3/4:</b> Resolving company logos and saving ${jobsData.length} job(s) to Supabase...`, {
       chat_id: chatId,
       message_id: statusMsg.message_id,
-      parse_mode: "Markdown",
+      parse_mode: "HTML",
     });
 
     const insertedJobs = [];
@@ -308,48 +317,48 @@ Note: If the Crawled Pages Context lacks explicit skills or responsibilities, in
       }
     }
 
-    await bot.editMessageText("📢 *Step 4/4:* Formatting final publication template...", {
+    await bot.editMessageText("📢 <b>Step 4/4:</b> Formatting final publication template...", {
       chat_id: chatId,
       message_id: statusMsg.message_id,
-      parse_mode: "Markdown",
+      parse_mode: "HTML",
     });
 
     // 4. Send final template response
     const today = new Date().toLocaleDateString("en-US", { day: "numeric", month: "long", year: "numeric" }).toUpperCase();
 
-    let formattedPost = `*📝 LATEST JOB OPENINGS | ${today}*\n\n`;
+    let formattedPost = `<b>📝 LATEST JOB OPENINGS | ${today}</b>\n\n`;
 
     insertedJobs.forEach((job) => {
       const jobUrl = `${PORTAL_BASE_URL}/jobs/${job.slug}`;
-      formattedPost += `🌟 *${job.company.toUpperCase()} IS HIRING!* 🌟\n`;
+      formattedPost += `🌟 <b>${escapeHtml(job.company.toUpperCase())} IS HIRING!</b> 🌟\n`;
       formattedPost += `━━━━━━━━━━━━━━━━━━━━\n`;
-      formattedPost += `  ◈ *Role:* ${job.title}\n`;
-      formattedPost += `  ◈ *Location:* ${job.location || "Across India"}\n`;
-      formattedPost += `  ◈ *Degree:* ${job.qualification || "Any Graduate"}\n`;
-      formattedPost += `  ◈ *Experience:* ${job.experience || "Freshers / Experienced"}\n`;
-      formattedPost += `  ◈ *Batch:* ${job.passout_year || "Any"}\n`;
+      formattedPost += `  ◈ <b>Role:</b> ${escapeHtml(job.title)}\n`;
+      formattedPost += `  ◈ <b>Location:</b> ${escapeHtml(job.location || "Across India")}\n`;
+      formattedPost += `  ◈ <b>Degree:</b> ${escapeHtml(job.qualification || "Any Graduate")}\n`;
+      formattedPost += `  ◈ <b>Experience:</b> ${escapeHtml(job.experience || "Freshers / Experienced")}\n`;
+      formattedPost += `  ◈ <b>Batch:</b> ${escapeHtml(job.passout_year || "Any")}\n`;
       if (job.salary) {
-        formattedPost += `  ◈ *Package:* ${job.salary}\n`;
+        formattedPost += `  ◈ <b>Package:</b> ${escapeHtml(job.salary)}\n`;
       }
       formattedPost += `━━━━━━━━━━━━━━━━━━━━\n`;
-      formattedPost += `🚀 *Apply Link:* ${jobUrl}\n`;
-      formattedPost += `⏰ *Apply ASAP! Link can expire anytime.*\n\n\n`;
+      formattedPost += `🚀 <b>Apply Link:</b> ${jobUrl}\n`;
+      formattedPost += `⏰ <b>Apply ASAP! Link can expire anytime.</b>\n\n\n`;
     });
 
-    formattedPost += `*📢 Share this opportunity with your Friends and WhatsApp Group ❤️*`;
+    formattedPost += `<b>📢 Share this opportunity with your Friends and WhatsApp Group ❤️</b>`;
 
     // Send formatted post in code block for easy one-tap copying on mobile
     await bot.deleteMessage(chatId, statusMsg.message_id);
-    await bot.sendMessage(chatId, `✅ *Successfully posted ${insertedJobs.length} job(s) to website!*\n\nHere is your ready-to-use publication post (tap to copy):`);
-    await bot.sendMessage(chatId, `\`\`\`\n${formattedPost.trim()}\n\`\`\``, { parse_mode: "Markdown" });
+    await bot.sendMessage(chatId, `✅ <b>Successfully posted ${insertedJobs.length} job(s) to website!</b>\n\nHere is your ready-to-use publication post (tap to copy):`, { parse_mode: "HTML" });
+    await bot.sendMessage(chatId, `<pre>${escapeHtml(formattedPost.trim())}</pre>`, { parse_mode: "HTML" });
 
     // Auto-broadcast to Telegram channel if configured
     if (TELEGRAM_CHANNEL_ID) {
       try {
-        await bot.sendMessage(TELEGRAM_CHANNEL_ID, formattedPost, { parse_mode: "Markdown" });
+        await bot.sendMessage(TELEGRAM_CHANNEL_ID, formattedPost, { parse_mode: "HTML" });
       } catch (err) {
         console.error("Auto-broadcast failed:", err.message);
-        await bot.sendMessage(chatId, `⚠️ *Warning:* Failed to auto-broadcast to your channel (${TELEGRAM_CHANNEL_ID}).\n\n*Solution:* Make sure the bot is added as an **Administrator** in your channel, and has permission to post messages!`);
+        await bot.sendMessage(chatId, `⚠️ <b>Warning:</b> Failed to auto-broadcast to your channel (${TELEGRAM_CHANNEL_ID}).\n\n<b>Solution:</b> Make sure the bot is added as an <b>Administrator</b> in your channel, and has permission to post messages!`, { parse_mode: "HTML" });
       }
     }
 
@@ -362,10 +371,10 @@ Note: If the Crawled Pages Context lacks explicit skills or responsibilities, in
 
   } catch (error) {
     console.error("Automation error:", error);
-    bot.editMessageText(`❌ *Failed to complete automation.*\n\n*Error:* ${error.message}`, {
+    bot.editMessageText(`❌ <b>Failed to complete automation.</b>\n\n<b>Error:</b> ${escapeHtml(error.message)}`, {
       chat_id: chatId,
       message_id: statusMsg.message_id,
-      parse_mode: "Markdown",
+      parse_mode: "HTML",
     });
   }
 });

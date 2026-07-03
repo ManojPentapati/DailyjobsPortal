@@ -108,13 +108,22 @@ const fetchLogoUrl = async (companyName) => {
   return `https://www.google.com/s2/favicons?sz=64&domain=${cleanDomain}&fallback=sitemap`;
 };
 
+// Helper: Escape HTML special characters
+function escapeHtml(text) {
+  if (!text) return "";
+  return String(text)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
 // Helper: Send message to Telegram
 async function sendTelegramMessage(chatId, text, replyToMessageId = null, replyMarkup = null) {
   const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
   const data = {
     chat_id: chatId,
     text: text,
-    parse_mode: "Markdown",
+    parse_mode: "HTML",
   };
   if (replyToMessageId) data.reply_to_message_id = replyToMessageId;
   if (replyMarkup) data.reply_markup = replyMarkup;
@@ -150,13 +159,13 @@ export default async function handler(req, res) {
 
   // Authorization Check
   if (allowedIds.length && !allowedIds.includes(userId)) {
-    await sendTelegramMessage(chatId, `❌ Unauthorized. Your Telegram User ID is: ${userId}\nTo gain access, add this ID to ALLOWED_USER_IDS in Vercel.`, messageId);
+    await sendTelegramMessage(chatId, `❌ Unauthorized. Your Telegram User ID is: <b>${userId}</b>\nTo gain access, add this ID to ALLOWED_USER_IDS in Vercel.`, messageId);
     return res.status(200).send("Unauthorized.");
   }
 
   // Handle start command
   if (text.startsWith("/start")) {
-    await sendTelegramMessage(chatId, "👋 Welcome to the *Daily Jobs Portal Aggregator Bot* (Vercel Webhook Mode)!\n\nForward any job posting message containing links to wrapper sites, and I will crawl the links, extract details using Gemini, post to Supabase, and give you the WhatsApp template instantly!");
+    await sendTelegramMessage(chatId, "👋 Welcome to the <b>Daily Jobs Portal Aggregator Bot</b> (Vercel Webhook Mode)!\n\nForward any job posting message containing links to wrapper sites, and I will crawl the links, extract details using Gemini, post to Supabase, and give you the WhatsApp template instantly!");
     return res.status(200).send("Start command handled.");
   }
 
@@ -286,27 +295,27 @@ Note: If the Crawled Pages Context lacks explicit skills or responsibilities, in
     // Resolve frontend URL base
     const portalUrlBase = req.headers.origin || `https://${req.headers.host}`;
     
-    let formattedPost = `*📝 LATEST JOB OPENINGS | ${today}*\n\n`;
+    let formattedPost = `<b>📝 LATEST JOB OPENINGS | ${today}</b>\n\n`;
     insertedJobs.forEach((job) => {
       const jobUrl = `${portalUrlBase}/jobs/${job.slug}`;
-      formattedPost += `🌟 *${job.company.toUpperCase()} IS HIRING!* 🌟\n`;
+      formattedPost += `🌟 <b>${escapeHtml(job.company.toUpperCase())} IS HIRING!</b> 🌟\n`;
       formattedPost += `━━━━━━━━━━━━━━━━━━━━\n`;
-      formattedPost += `  ◈ *Role:* ${job.title}\n`;
-      formattedPost += `  ◈ *Location:* ${job.location || "Across India"}\n`;
-      formattedPost += `  ◈ *Degree:* ${job.qualification || "Any Graduate"}\n`;
-      formattedPost += `  ◈ *Experience:* ${job.experience || "Freshers / Experienced"}\n`;
-      formattedPost += `  ◈ *Batch:* ${job.passout_year || "Any"}\n`;
+      formattedPost += `  ◈ <b>Role:</b> ${escapeHtml(job.title)}\n`;
+      formattedPost += `  ◈ <b>Location:</b> ${escapeHtml(job.location || "Across India")}\n`;
+      formattedPost += `  ◈ <b>Degree:</b> ${escapeHtml(job.qualification || "Any Graduate")}\n`;
+      formattedPost += `  ◈ <b>Experience:</b> ${escapeHtml(job.experience || "Freshers / Experienced")}\n`;
+      formattedPost += `  ◈ <b>Batch:</b> ${escapeHtml(job.passout_year || "Any")}\n`;
       if (job.salary) {
-        formattedPost += `  ◈ *Package:* ${job.salary}\n`;
+        formattedPost += `  ◈ <b>Package:</b> ${escapeHtml(job.salary)}\n`;
       }
       formattedPost += `━━━━━━━━━━━━━━━━━━━━\n`;
-      formattedPost += `🚀 *Apply Link:* ${jobUrl}\n`;
-      formattedPost += `⏰ *Apply ASAP! Link can expire anytime.*\n\n\n`;
+      formattedPost += `🚀 <b>Apply Link:</b> ${jobUrl}\n`;
+      formattedPost += `⏰ <b>Apply ASAP! Link can expire anytime.</b>\n\n\n`;
     });
-    formattedPost += `*📢 Share this opportunity with your Friends and WhatsApp Group ❤️*`;
+    formattedPost += `<b>📢 Share this opportunity with your Friends and WhatsApp Group ❤️</b>`;
 
     // 4. Send final template response and delete original message to keep chat clean
-    await sendTelegramMessage(chatId, `✅ *Successfully posted ${insertedJobs.length} job(s) to website!*\n\nHere is your ready-to-use publication post (tap to copy):\n\n\`\`\`\n${formattedPost.trim()}\n\`\`\``);
+    await sendTelegramMessage(chatId, `✅ <b>Successfully posted ${insertedJobs.length} job(s) to website!</b>\n\nHere is your ready-to-use publication post (tap to copy):\n\n<pre>${escapeHtml(formattedPost.trim())}</pre>`);
 
     // Auto-broadcast to Telegram channel if configured
     if (TELEGRAM_CHANNEL_ID) {
@@ -314,7 +323,7 @@ Note: If the Crawled Pages Context lacks explicit skills or responsibilities, in
         await sendTelegramMessage(TELEGRAM_CHANNEL_ID, formattedPost);
       } catch (err) {
         console.error("Auto-broadcast failed:", err.message);
-        await sendTelegramMessage(chatId, `⚠️ *Warning:* Failed to auto-broadcast to your channel (${TELEGRAM_CHANNEL_ID}).\n\n*Solution:* Make sure the bot is added as an **Administrator** in your channel, and has permission to post messages!`);
+        await sendTelegramMessage(chatId, `⚠️ <b>Warning:</b> Failed to auto-broadcast to your channel (${TELEGRAM_CHANNEL_ID}).\n\n<b>Solution:</b> Make sure the bot is added as an <b>Administrator</b> in your channel, and has permission to post messages!`);
       }
     }
 
@@ -322,7 +331,7 @@ Note: If the Crawled Pages Context lacks explicit skills or responsibilities, in
 
   } catch (error) {
     console.error("Webhook processing error:", error);
-    await sendTelegramMessage(chatId, `❌ *Failed to complete automation.*\n\n*Error:* ${error.message}`, messageId);
+    await sendTelegramMessage(chatId, `❌ <b>Failed to complete automation.</b>\n\n<b>Error:</b> ${escapeHtml(error.message)}`, messageId);
   }
 
   return res.status(200).send("Done.");

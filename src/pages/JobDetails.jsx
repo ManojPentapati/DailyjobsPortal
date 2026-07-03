@@ -23,6 +23,9 @@ export default function JobDetails() {
   const [loading, setLoading] = useState(true);
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [showRedirectModal, setShowRedirectModal] = useState(false);
+  const [countdown, setCountdown] = useState(3);
+  const [redirectInterval, setRedirectInterval] = useState(null);
 
   useEffect(() => {
     async function fetchJob() {
@@ -131,10 +134,6 @@ export default function JobDetails() {
     setTimeout(() => setCopied(false), 2000);
     setShowShareMenu(false);
   };
-
-  const [showRedirectModal, setShowRedirectModal] = useState(false);
-  const [countdown, setCountdown] = useState(3);
-  const [redirectInterval, setRedirectInterval] = useState(null);
 
   const handleApplyRedirect = () => {
     if (!job?.apply_link) {

@@ -339,7 +339,11 @@ Note: If the Crawled Pages Context lacks explicit skills or responsibilities, in
       channelPost += `🚀 <b>Apply Link:</b> ${jobUrl}\n`;
       channelPost += `⏰ <b>Apply ASAP! Link can expire anytime.</b>\n\n\n`;
     });
-    channelPost += `<b>📢 Share this opportunity with your Friends and WhatsApp Group ❤️</b>`;
+    channelPost += `<b>📢 Share this opportunity with your Friends and WhatsApp Group ❤️</b>\n\n`;
+    channelPost += `<b>🌐 Search more tech jobs on our website:</b>\n`;
+    channelPost += `https://dailyjobs-portal.vercel.app\n\n`;
+    channelPost += `<b>👉 Join our WhatsApp Channel for mobile alerts:</b>\n`;
+    channelPost += `https://whatsapp.com/channel/0029VbCRYZN0Qeaep5uwNY3f`;
 
     // 4. Send final template response and delete original message to keep chat clean
     await sendTelegramMessage(chatId, `✅ <b>Successfully posted ${insertedJobs.length} job(s) to website!</b>\n\nHere is your ready-to-use publication post (tap to copy):\n\n<pre>${escapeHtml(whatsAppPost.trim())}</pre>`);

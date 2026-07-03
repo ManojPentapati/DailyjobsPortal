@@ -7,6 +7,7 @@ const quickLinks = [
   { to: "/categories", label: "Categories" },
   { to: "/contact", label: "Contact" },
   { to: "/privacy", label: "Privacy Policy" },
+  { to: "/terms", label: "Terms of Service" },
   { to: "/admin/login", label: "Admin Panel" },
 ];
 

@@ -50,6 +50,13 @@ export default async function handler(req, res) {
     xml += `    <priority>0.3</priority>\n`;
     xml += `  </url>\n`;
 
+    // Add static terms page
+    xml += `  <url>\n`;
+    xml += `    <loc>${baseUrl}/terms</loc>\n`;
+    xml += `    <changefreq>monthly</changefreq>\n`;
+    xml += `    <priority>0.3</priority>\n`;
+    xml += `  </url>\n`;
+
     // Add dynamic job slug pages
     if (jobs && jobs.length > 0) {
       jobs.forEach((job) => {

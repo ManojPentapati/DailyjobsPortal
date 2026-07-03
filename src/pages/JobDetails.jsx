@@ -51,7 +51,7 @@ export default function JobDetails() {
   useEffect(() => {
     if (job) {
       const title = `${job.title} at ${job.company} – Daily Jobs Portal`;
-      const desc = `Apply for ${job.title} at ${job.company} in ${job.location}. ${job.experience} experience. ${job.salary || "Competitive salary"}.`;
+      const desc = `Apply for ${job.title} at ${job.company} in ${job.location || 'India'}. ${job.experience || 'Freshers / Experienced'} experience. ${job.salary || "Competitive salary"}.`;
       document.title = title;
 
       // Meta description
@@ -68,6 +68,26 @@ export default function JobDetails() {
       });
 
       window.scrollTo({ top: 0, behavior: "smooth" });
+
+      // Cleanup to restore default home page SEO values on unmount
+      return () => {
+        const defaultTitle = "Daily Jobs Portal – Find Your Next Tech Opportunity";
+        const defaultDesc = "Daily Jobs Portal – Find your next tech opportunity in India. Browse thousands of curated jobs in software development, AI/ML, data science, cloud computing, DevOps, and more.";
+        document.title = defaultTitle;
+
+        const mDesc = document.querySelector('meta[name="description"]');
+        if (mDesc) mDesc.content = defaultDesc;
+
+        const defaultOg = { 
+          "og:title": "Daily Jobs Portal – Find Your Next Opportunity", 
+          "og:description": "Connecting India's top tech talent with the best companies.",
+          "og:url": window.location.origin
+        };
+        Object.entries(defaultOg).forEach(([prop, content]) => {
+          const t = document.querySelector(`meta[property="${prop}"]`);
+          if (t) t.content = content;
+        });
+      };
     }
   }, [job]);
 

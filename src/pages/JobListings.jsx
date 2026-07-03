@@ -22,7 +22,6 @@ export default function JobListings() {
   const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
-    document.title = "Browse Jobs – Daily Jobs Portal";
     const cat = searchParams.get("category");
     if (cat) {
       dispatch({ type: "CLEAR_FILTERS" }).then(() => {
@@ -30,6 +29,62 @@ export default function JobListings() {
       });
     }
   }, [searchParams]);
+
+  // Dynamic SEO Title and Meta Description
+  useEffect(() => {
+    let title = "Browse Jobs – Daily Jobs Portal";
+    let desc = "Browse thousands of curated tech job listings on Daily Jobs Portal. Find your next opportunity in Bangalore, Hyderabad, remote, and more.";
+
+    const activeCategories = state.filters.category || [];
+    const activeLocations = state.filters.location || [];
+    const search = state.searchQuery;
+
+    if (activeCategories.length && activeLocations.length) {
+      title = `${activeCategories[0]} Jobs in ${activeLocations[0]} – Daily Jobs Portal`;
+      desc = `Find the best ${activeCategories[0]} jobs in ${activeLocations[0]}. Apply for fresh opportunities now on Daily Jobs Portal!`;
+    } else if (activeCategories.length) {
+      title = `${activeCategories[0]} Jobs – Daily Jobs Portal`;
+      desc = `Find the latest ${activeCategories[0]} jobs. Apply for fresh opportunities now on Daily Jobs Portal!`;
+    } else if (activeLocations.length) {
+      title = `Tech Jobs in ${activeLocations[0]} – Daily Jobs Portal`;
+      desc = `Find the latest tech and software jobs in ${activeLocations[0]}. Apply for verified opportunities now on Daily Jobs Portal!`;
+    } else if (search) {
+      title = `Search results for "${search}" – Daily Jobs Portal`;
+      desc = `Browse job openings matching "${search}". Apply for fresh opportunities now on Daily Jobs Portal!`;
+    }
+
+    document.title = title;
+
+    // Update meta description
+    let metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) metaDesc.content = desc;
+
+    // Update OpenGraph
+    const ogTags = { "og:title": title, "og:description": desc };
+    Object.entries(ogTags).forEach(([prop, content]) => {
+      const tag = document.querySelector(`meta[property="${prop}"]`);
+      if (tag) tag.content = content;
+    });
+
+    // Cleanup to restore defaults on unmount
+    return () => {
+      const defaultTitle = "Daily Jobs Portal – Find Your Next Tech Opportunity";
+      const defaultDesc = "Daily Jobs Portal – Find your next tech opportunity in India. Browse thousands of curated jobs in software development, AI/ML, data science, cloud computing, DevOps, and more.";
+      document.title = defaultTitle;
+
+      const mDesc = document.querySelector('meta[name="description"]');
+      if (mDesc) mDesc.content = defaultDesc;
+
+      const defaultOg = { 
+        "og:title": "Daily Jobs Portal – Find Your Next Opportunity", 
+        "og:description": "Connecting India's top tech talent with the best companies."
+      };
+      Object.entries(defaultOg).forEach(([prop, content]) => {
+        const t = document.querySelector(`meta[property="${prop}"]`);
+        if (t) t.content = content;
+      });
+    };
+  }, [state.filters.category, state.filters.location, state.searchQuery]);
 
   const handleSort = (e) => dispatch({ type: "SET_SORT", payload: e.target.value });
   const handlePage = (page) => {

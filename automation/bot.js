@@ -371,7 +371,8 @@ Note: If the Crawled Pages Context lacks explicit skills or responsibilities, in
 
   } catch (error) {
     console.error("Automation error:", error);
-    bot.editMessageText(`❌ <b>Failed to complete automation.</b>\n\n<b>Error:</b> ${escapeHtml(error.message)}`, {
+    const errorDetails = error.response?.data?.description || error.message;
+    bot.editMessageText(`❌ <b>Failed to complete automation.</b>\n\n<b>Error:</b> ${escapeHtml(errorDetails)}`, {
       chat_id: chatId,
       message_id: statusMsg.message_id,
       parse_mode: "HTML",

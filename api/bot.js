@@ -331,7 +331,8 @@ Note: If the Crawled Pages Context lacks explicit skills or responsibilities, in
 
   } catch (error) {
     console.error("Webhook processing error:", error);
-    await sendTelegramMessage(chatId, `❌ <b>Failed to complete automation.</b>\n\n<b>Error:</b> ${escapeHtml(error.message)}`, messageId);
+    const errorDetails = error.response?.data?.description || error.message;
+    await sendTelegramMessage(chatId, `❌ <b>Failed to complete automation.</b>\n\n<b>Error:</b> ${escapeHtml(errorDetails)}`, messageId);
   }
 
   return res.status(200).send("Done.");

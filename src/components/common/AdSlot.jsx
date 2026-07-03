@@ -1,8 +1,10 @@
 import { useEffect } from "react";
 
 export default function AdSlot({ slot, format = "auto", className = "", style = {} }) {
-  // Read AdSense Client ID from Vite environment variables
-  const adsenseClient = import.meta.env.VITE_ADSENSE_CLIENT;
+  // Use user's production AdSense Client ID automatically, but use placeholders in development
+  const adsenseClient = import.meta.env.DEV
+    ? import.meta.env.VITE_ADSENSE_CLIENT
+    : (import.meta.env.VITE_ADSENSE_CLIENT || "ca-pub-6442882960418093");
 
   useEffect(() => {
     // If client ID is configured, load the Google AdSense script and push the ad

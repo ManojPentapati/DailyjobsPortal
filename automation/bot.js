@@ -344,7 +344,11 @@ Note: If the Crawled Pages Context lacks explicit skills or responsibilities, in
       whatsAppPost += `🚀 *Apply Link:* ${jobUrl}\n`;
       whatsAppPost += `⏰ *Apply ASAP! Link can expire anytime.*\n\n\n`;
     });
-    whatsAppPost += `*📢 Share this opportunity with your Friends and WhatsApp Group ❤️*`;
+    whatsAppPost += `*📢 Share this opportunity with your Friends and WhatsApp Group ❤️*\n\n`;
+    whatsAppPost += `*👉 Join our Telegram Channel for daily updates:* \n`;
+    whatsAppPost += `https://t.me/DailyJobsUpdatesportal\n\n`;
+    whatsAppPost += `*🤖 Send job links to parse them instantly:* \n`;
+    whatsAppPost += `@DailyJobsPortalBot`;
 
     // 2. Build Telegram Channel version (using <b> for bold)
     let channelPost = `<b>📝 LATEST JOB OPENINGS | ${today}</b>\n\n`;

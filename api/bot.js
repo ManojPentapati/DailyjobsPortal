@@ -190,7 +190,7 @@ export default async function handler(req, res) {
     }
 
     // 2. Query Gemini
-    const model = ai.getGenerativeModel({ model: "gemini-2.0-flash" });
+    const model = ai.getGenerativeModel({ model: "gemini-flash-latest" });
     const prompt = `
 You are a job parser AI. Your task is to analyze a raw job post message and the text/links crawled from its linked landing pages.
 The message contains multiple job listings. Your goal is to map each job to its crawled page context and extract the details.

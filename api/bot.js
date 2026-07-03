@@ -25,9 +25,9 @@ const supabase = createClient(VITE_SUPABASE_URL || "", supabaseKey);
 function extractUrls(text) {
   const urlRegex = /(https?:\/\/[^\s]+)/g;
   const matches = text.match(urlRegex) || [];
-  
+
   const ignorePatterns = [
-    "t.me", "telegram.me", "wa.me", "whatsapp.com", "instagram.com", 
+    "t.me", "telegram.me", "wa.me", "whatsapp.com", "instagram.com",
     "facebook.com", "linkedin.com", "twitter.com", "x.com", "youtube.com"
   ];
 
@@ -190,7 +190,7 @@ export default async function handler(req, res) {
     }
 
     // 2. Query Gemini
-    const model = ai.getGenerativeModel({ model: "gemini-flash-latest" });
+    const model = ai.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
     const prompt = `
 You are a job parser AI. Your task is to analyze a raw job post message and the text/links crawled from its linked landing pages.
 The message contains multiple job listings. Your goal is to map each job to its crawled page context and extract the details.
@@ -228,13 +228,13 @@ Note: If the Crawled Pages Context lacks explicit skills or responsibilities, in
 
     const result = await model.generateContent(prompt);
     let responseText = result.response.text().trim();
-    
+
     if (responseText.startsWith("```")) {
       responseText = responseText.replace(/^```json/, "").replace(/```$/, "").trim();
     }
 
     const jobsData = JSON.parse(responseText);
-    
+
     if (!Array.isArray(jobsData)) {
       throw new Error("Gemini did not return an array of job listings.");
     }
@@ -291,10 +291,10 @@ Note: If the Crawled Pages Context lacks explicit skills or responsibilities, in
 
     // 3. Format final publication template
     const today = new Date().toLocaleDateString("en-US", { day: "numeric", month: "long", year: "numeric" }).toUpperCase();
-    
+
     // Resolve frontend URL base
     const portalUrlBase = req.headers.origin || `https://${req.headers.host}`;
-    
+
     // 1. Build WhatsApp version (using * for bold, no HTML tags)
     let whatsAppPost = `*📝 LATEST JOB OPENINGS | ${today}*\n\n`;
     insertedJobs.forEach((job) => {

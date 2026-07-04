@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
-import { Mail, Phone, MapPin, Send, CheckCircle2, MessageSquare, Clock } from "lucide-react";
+import { Mail, MapPin, Send, CheckCircle2, MessageSquare, Clock } from "lucide-react";
 
 const CONTACT_INFO = [
-  { icon: Mail, label: "Email Us", value: "srimanoj.pentapati@gmail.com", href: "mailto:srimanoj.pentapati@gmail.com", color: "text-amber-500 bg-amber-50 dark:bg-amber-950/40" },
-  { icon: Phone, label: "Call Us", value: "+91-9550250484", href: "tel:+91-9550250484", color: "text-emerald-500 bg-emerald-50 dark:bg-emerald-900/20" },
+  { icon: Mail, label: "Email Us", value: "dailyjobsposting@gmail.com", href: "mailto:dailyjobsposting@gmail.com", color: "text-amber-500 bg-amber-50 dark:bg-amber-950/40" },
   { icon: MapPin, label: "Visit Us", value: "Hyderabad,Telangana", href: "#", color: "text-violet-500 bg-violet-50 dark:bg-violet-900/20" },
 ];
 

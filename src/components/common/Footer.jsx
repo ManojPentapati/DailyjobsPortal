@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Briefcase, Mail, Phone, MapPin, Heart, ArrowUpRight } from "lucide-react";
+import { Briefcase, Mail, MapPin, Heart, ArrowUpRight } from "lucide-react";
 
 const quickLinks = [
   { to: "/", label: "Home" },
@@ -50,8 +50,7 @@ export default function Footer() {
               </p>
               <div className="flex flex-col gap-2.5 text-sm">
                 {[
-                  { Icon: Mail, text: "srimanoj.pentapati@gmail.com", href: "mailto:srimanoj.pentapati@gmail.com" },
-                  { Icon: Phone, text: "+91 9550250484", href: "tel:+919550250484" },
+                  { Icon: Mail, text: "dailyjobsposting@gmail.com", href: "mailto:dailyjobsposting@gmail.com" },
                   { Icon: MapPin, text: "Hyderabad, India", href: "#" },
                 ].map(({ Icon, text, href }) => (
                   <a key={text} href={href} className="flex items-center gap-2.5 text-stone-500 dark:text-slate-500 hover:text-amber-600 dark:hover:text-amber-400 transition-colors duration-200">

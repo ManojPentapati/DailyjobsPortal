@@ -189,8 +189,7 @@ export default async function handler(req, res) {
       return res.status(200).send("Crawl failed.");
     }
 
-    // 2. Query Gemini
-    const model = ai.getGenerativeModel({ model: "gemini-2.5-flash" });
+    // 2. Query Gemini with fallback support
     const prompt = `
 You are a job parser AI. Your task is to analyze a raw job post message and the text/links crawled from its linked landing pages.
 The message contains multiple job listings. Your goal is to map each job to its crawled page context and extract the details.
@@ -226,7 +225,25 @@ Respond with a raw JSON array of job objects matching the exact schema below. Do
 Note: If the Crawled Pages Context lacks explicit skills or responsibilities, infer a logical list of 3-5 key skills and responsibilities based on the job title and company. Never leave them empty.
 `;
 
-    const result = await model.generateContent(prompt);
+    const modelsToTry = ["gemini-2.5-flash", "gemini-2.0-flash-lite", "gemini-flash-latest"];
+    let result = null;
+    let geminiError = null;
+
+    for (const modelName of modelsToTry) {
+      try {
+        const model = ai.getGenerativeModel({ model: modelName });
+        result = await model.generateContent(prompt);
+        break; // Success! Break loop
+      } catch (err) {
+        console.error(`Gemini model ${modelName} failed:`, err.message);
+        geminiError = err;
+      }
+    }
+
+    if (!result) {
+      throw new Error(`Gemini query failed for all attempted models. Last error: ${geminiError?.message}`);
+    }
+
     let responseText = result.response.text().trim();
 
     if (responseText.startsWith("```")) {

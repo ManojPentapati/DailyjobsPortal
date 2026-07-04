@@ -346,12 +346,50 @@ Note: If the Crawled Pages Context lacks explicit skills or responsibilities, in
     channelPost += `https://whatsapp.com/channel/0029VbCRYZN0Qeaep5uwNY3f`;
 
     // 4. Send final template response and delete original message to keep chat clean
-    await sendTelegramMessage(chatId, `✅ <b>Successfully posted ${insertedJobs.length} job(s) to website!</b>\n\nHere is your ready-to-use publication post (tap to copy):\n\n<pre>${escapeHtml(whatsAppPost.trim())}</pre>`);
+    await sendTelegramMessage(chatId, `✅ <b>Successfully posted ${insertedJobs.length} job(s) to website!</b>\n\nHere is your ready-to-use publication post (tap to copy):`);
+
+    // Send whatsAppPost in chunks if it exceeds 3500 characters
+    const maxPostLength = 3500;
+    if (whatsAppPost.length <= maxPostLength) {
+      await sendTelegramMessage(chatId, `<pre>${escapeHtml(whatsAppPost.trim())}</pre>`);
+    } else {
+      const jobs = whatsAppPost.split("\n\n\n");
+      let currentChunk = "";
+      for (const job of jobs) {
+        if (!job.trim()) continue;
+        if ((currentChunk + job).length > maxPostLength) {
+          await sendTelegramMessage(chatId, `<pre>${escapeHtml(currentChunk.trim())}</pre>`);
+          currentChunk = job + "\n\n\n";
+        } else {
+          currentChunk += job + "\n\n\n";
+        }
+      }
+      if (currentChunk.trim()) {
+        await sendTelegramMessage(chatId, `<pre>${escapeHtml(currentChunk.trim())}</pre>`);
+      }
+    }
 
     // Auto-broadcast to Telegram channel if configured
     if (TELEGRAM_CHANNEL_ID) {
       try {
-        await sendTelegramMessage(TELEGRAM_CHANNEL_ID, channelPost);
+        if (channelPost.length <= 4000) {
+          await sendTelegramMessage(TELEGRAM_CHANNEL_ID, channelPost);
+        } else {
+          const jobs = channelPost.split("\n\n\n");
+          let currentChunk = `<b>📝 LATEST JOB OPENINGS | ${today}</b>\n\n`;
+          for (const job of jobs) {
+            if (!job.trim() || job.includes("LATEST JOB OPENINGS")) continue;
+            if ((currentChunk + job).length > 4000) {
+              await sendTelegramMessage(TELEGRAM_CHANNEL_ID, currentChunk);
+              currentChunk = job + "\n\n\n";
+            } else {
+              currentChunk += job + "\n\n\n";
+            }
+          }
+          if (currentChunk.trim()) {
+            await sendTelegramMessage(TELEGRAM_CHANNEL_ID, currentChunk);
+          }
+        }
       } catch (err) {
         console.error("Auto-broadcast failed:", err.message);
         await sendTelegramMessage(chatId, `⚠️ <b>Warning:</b> Failed to auto-broadcast to your channel (${TELEGRAM_CHANNEL_ID}).\n\n<b>Solution:</b> Make sure the bot is added as an <b>Administrator</b> in your channel, and has permission to post messages!`);

@@ -379,12 +379,49 @@ Note: If the Crawled Pages Context lacks explicit skills or responsibilities, in
     // Send formatted post in code block for easy one-tap copying on mobile
     await bot.deleteMessage(chatId, statusMsg.message_id);
     await bot.sendMessage(chatId, `✅ <b>Successfully posted ${insertedJobs.length} job(s) to website!</b>\n\nHere is your ready-to-use publication post (tap to copy):`, { parse_mode: "HTML" });
-    await bot.sendMessage(chatId, `<pre>${escapeHtml(whatsAppPost.trim())}</pre>`, { parse_mode: "HTML" });
+
+    // Send whatsAppPost in chunks if it exceeds 3500 characters
+    const maxPostLength = 3500;
+    if (whatsAppPost.length <= maxPostLength) {
+      await bot.sendMessage(chatId, `<pre>${escapeHtml(whatsAppPost.trim())}</pre>`, { parse_mode: "HTML" });
+    } else {
+      const jobs = whatsAppPost.split("\n\n\n");
+      let currentChunk = "";
+      for (const job of jobs) {
+        if (!job.trim()) continue;
+        if ((currentChunk + job).length > maxPostLength) {
+          await bot.sendMessage(chatId, `<pre>${escapeHtml(currentChunk.trim())}</pre>`, { parse_mode: "HTML" });
+          currentChunk = job + "\n\n\n";
+        } else {
+          currentChunk += job + "\n\n\n";
+        }
+      }
+      if (currentChunk.trim()) {
+        await bot.sendMessage(chatId, `<pre>${escapeHtml(currentChunk.trim())}</pre>`, { parse_mode: "HTML" });
+      }
+    }
 
     // Auto-broadcast to Telegram channel if configured
     if (TELEGRAM_CHANNEL_ID) {
       try {
-        await bot.sendMessage(TELEGRAM_CHANNEL_ID, channelPost, { parse_mode: "HTML" });
+        if (channelPost.length <= 4000) {
+          await bot.sendMessage(TELEGRAM_CHANNEL_ID, channelPost, { parse_mode: "HTML" });
+        } else {
+          const jobs = channelPost.split("\n\n\n");
+          let currentChunk = `<b>📝 LATEST JOB OPENINGS | ${today}</b>\n\n`;
+          for (const job of jobs) {
+            if (!job.trim() || job.includes("LATEST JOB OPENINGS")) continue;
+            if ((currentChunk + job).length > 4000) {
+              await bot.sendMessage(TELEGRAM_CHANNEL_ID, currentChunk, { parse_mode: "HTML" });
+              currentChunk = job + "\n\n\n";
+            } else {
+              currentChunk += job + "\n\n\n";
+            }
+          }
+          if (currentChunk.trim()) {
+            await bot.sendMessage(TELEGRAM_CHANNEL_ID, currentChunk, { parse_mode: "HTML" });
+          }
+        }
       } catch (err) {
         console.error("Auto-broadcast failed:", err.message);
         await bot.sendMessage(chatId, `⚠️ <b>Warning:</b> Failed to auto-broadcast to your channel (${TELEGRAM_CHANNEL_ID}).\n\n<b>Solution:</b> Make sure the bot is added as an <b>Administrator</b> in your channel, and has permission to post messages!`, { parse_mode: "HTML" });

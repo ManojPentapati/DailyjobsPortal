@@ -340,6 +340,17 @@ Note: If the Crawled Pages Context lacks explicit skills or responsibilities, in
       }
     }
 
+    // If all jobs were duplicates and nothing new was inserted
+    if (insertedJobs.length === 0 && skippedCount > 0) {
+      await bot.deleteMessage(chatId, statusMsg.message_id);
+      await bot.sendMessage(chatId, `⚠️ This job listing already exists on the website. Skipped.`, { parse_mode: "HTML" });
+      
+      try {
+        await bot.deleteMessage(chatId, msg.message_id);
+      } catch (err) { /* ignore */ }
+      return;
+    }
+
     await bot.editMessageText("📢 <b>Step 4/4:</b> Formatting final publication template...", {
       chat_id: chatId,
       message_id: statusMsg.message_id,

@@ -312,6 +312,13 @@ Note: If the Crawled Pages Context lacks explicit skills or responsibilities, in
       }
     }
 
+    // If all jobs were duplicates and nothing new was inserted
+    if (insertedJobs.length === 0 && skippedCount > 0) {
+      await sendTelegramMessage(chatId, `⚠️ This job listing already exists on the website. Skipped.`, messageId);
+      await deleteTelegramMessage(chatId, messageId);
+      return res.status(200).send("Duplicate skipped.");
+    }
+
     // 3. Format final publication template
     const today = new Date().toLocaleDateString("en-US", { day: "numeric", month: "long", year: "numeric" }).toUpperCase();
 

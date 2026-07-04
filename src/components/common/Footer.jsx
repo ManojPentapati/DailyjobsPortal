@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import { Briefcase, Mail, MapPin, Heart, ArrowUpRight } from "lucide-react";
-import NewsletterSignup from "./NewsletterSignup";
 
 const quickLinks = [
   { to: "/", label: "Home" },
@@ -28,11 +27,6 @@ export default function Footer() {
         style={{ boxShadow: "0 -1px 4px rgba(0,0,0,0.04), 0 1px 4px rgba(0,0,0,0.05)" }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Newsletter */}
-          <div className="pt-10 sm:pt-14 pb-6">
-            <NewsletterSignup />
-          </div>
-
           {/* Main grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10 lg:gap-12 py-10 sm:py-14">
 

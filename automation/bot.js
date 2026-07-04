@@ -306,7 +306,7 @@ Note: If the Crawled Pages Context lacks explicit skills or responsibilities, in
       }
 
       const expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + 30);
+      expiresAt.setDate(expiresAt.getDate() + 7);
 
       const { data: inserted, error: dbError } = await supabase
         .from("jobs")
@@ -376,7 +376,7 @@ Note: If the Crawled Pages Context lacks explicit skills or responsibilities, in
       }
       whatsAppPost += `━━━━━━━━━━━━━━━━━━━━\n`;
       whatsAppPost += `🚀 *Apply Link:* ${jobUrl}\n`;
-      whatsAppPost += `⏰ *Apply ASAP! Link can expire anytime.*\n\n\n`;
+      whatsAppPost += `⏰ *Apply ASAP! Link expires in 7 days.*\n\n\n`;
     });
     whatsAppPost += `*📢 Share this opportunity with your Friends and WhatsApp Group ❤️*\n\n`;
     whatsAppPost += `*🌐 Search more tech jobs on our website:* \n`;
@@ -402,7 +402,7 @@ Note: If the Crawled Pages Context lacks explicit skills or responsibilities, in
       }
       channelPost += `━━━━━━━━━━━━━━━━━━━━\n`;
       channelPost += `🚀 <b>Apply Link:</b> ${jobUrl}\n`;
-      channelPost += `⏰ <b>Apply ASAP! Link can expire anytime.</b>\n\n\n`;
+      channelPost += `⏰ <b>Apply ASAP! Link expires in 7 days.</b>\n\n\n`;
     });
     channelPost += `<b>📢 Share this opportunity with your Friends and WhatsApp Group ❤️</b>\n\n`;
     channelPost += `<b>🌐 Search more tech jobs on our website:</b>\n`;

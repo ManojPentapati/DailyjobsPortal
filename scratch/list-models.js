@@ -1,33 +1,25 @@
 import dotenv from "dotenv";
 import axios from "axios";
-import path from "path";
-import { fileURLToPath } from "url";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-dotenv.config({ path: path.join(__dirname, "../.env") });
+dotenv.config();
 
 const apiKey = process.env.GEMINI_API_KEY;
-
 if (!apiKey) {
-  console.error("No GEMINI_API_KEY found in .env file.");
+  console.error("GEMINI_API_KEY is not defined in .env");
   process.exit(1);
 }
 
-async function listModels() {
+async function run() {
   try {
     const url = `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`;
-    const res = await axios.get(url);
-    console.log("=== Supported Gemini Models on your API Key ===");
-    res.data.models.forEach((m) => {
-      console.log(`- Model: ${m.name.replace("models/", "")}`);
-      console.log(`  DisplayName: ${m.displayName}`);
-      console.log(`  Supported Actions: ${m.supportedGenerationMethods.join(", ")}`);
-      console.log("-----------------------------------------");
-    });
-  } catch (err) {
-    console.error("Failed to list models:", err.response?.data || err.message);
+    const { data } = await axios.get(url);
+    console.log("SUCCESSFULLY LISTED MODELS:");
+    for (const model of data.models || []) {
+      console.log(`- Name: ${model.name} (${model.displayName})`);
+    }
+  } catch (error) {
+    console.error("Error listing models:", error.response ? error.response.data : error.message);
   }
 }
 
-listModels();
+run();

@@ -11,6 +11,7 @@ export function JobProvider({ children }) {
       type: [],
       category: [],
       company: [],
+      salary: [],
       qualification: [],
       passout_year: [],
     },
@@ -45,6 +46,14 @@ export function JobProvider({ children }) {
     if (state.filters.category.length) q = q.in("category", state.filters.category);
     if (state.filters.company.length) q = q.in("company", state.filters.company);
     if (state.filters.qualification?.length) q = q.in("qualification", state.filters.qualification);
+    // Salary filter: match ranges like "0-5 LPA", "5-10 LPA", etc. using ilike on the salary text field
+    if (state.filters.salary?.length) {
+      const salaryFilters = state.filters.salary.map(range => {
+        if (range === "0-5 LPA") return `salary.ilike.%LPA%`;
+        return `salary.ilike.%${range.replace(" LPA", "")}%`;
+      }).join(",");
+      q = q.or(salaryFilters);
+    }
     if (state.filters.passout_year?.length) {
       const yearFilters = state.filters.passout_year.map(y => `passout_year.ilike.%${y}%`).join(",");
       q = q.or(yearFilters);

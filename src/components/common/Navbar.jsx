@@ -8,6 +8,7 @@ const navLinks = [
   { to: "/", label: "Home" },
   { to: "/jobs", label: "Find Jobs" },
   { to: "/categories", label: "Categories" },
+  { to: "/saved-jobs", label: "Saved" },
   { to: "/contact", label: "Contact" },
 ];
 

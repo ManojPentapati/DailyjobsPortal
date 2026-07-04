@@ -165,8 +165,36 @@ export default async function handler(req, res) {
 
   // Handle start command
   if (text.startsWith("/start")) {
-    await sendTelegramMessage(chatId, "👋 Welcome to the <b>Daily Jobs Portal Aggregator Bot</b> (Vercel Webhook Mode)!\n\nForward any job posting message containing links to wrapper sites, and I will crawl the links, extract details using Gemini, post to Supabase, and give you the WhatsApp template instantly!");
+    await sendTelegramMessage(chatId, "👋 Welcome to the <b>Daily Jobs Portal Aggregator Bot</b> (Vercel Webhook Mode)!\n\nForward any job posting message containing links to wrapper sites, and I will crawl the links, extract details using Gemini, post to Supabase, and give you the WhatsApp template instantly!\n\n<b>Commands:</b>\n/start — Show this welcome message\n/stats — Show portal statistics");
     return res.status(200).send("Start command handled.");
+  }
+
+  // Handle stats command
+  if (text.startsWith("/stats")) {
+    try {
+      const now = new Date().toISOString();
+      const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
+      const threeDaysLater = new Date(Date.now() + 3 * 86400000).toISOString();
+
+      const [activeRes, todayRes, expiringRes, totalRes] = await Promise.all([
+        supabase.from("jobs").select("*", { count: "exact", head: true }).eq("is_active", true).gt("expires_at", now),
+        supabase.from("jobs").select("*", { count: "exact", head: true }).gte("posted_date", todayStart.toISOString()),
+        supabase.from("jobs").select("*", { count: "exact", head: true }).eq("is_active", true).gt("expires_at", now).lt("expires_at", threeDaysLater),
+        supabase.from("jobs").select("*", { count: "exact", head: true }),
+      ]);
+
+      const stats = `📊 <b>Daily Jobs Portal — Stats</b>\n\n` +
+        `✅ Active Jobs: <b>${activeRes.count || 0}</b>\n` +
+        `🆕 Posted Today: <b>${todayRes.count || 0}</b>\n` +
+        `⏳ Expiring in 3 days: <b>${expiringRes.count || 0}</b>\n` +
+        `📦 Total All-time: <b>${totalRes.count || 0}</b>\n\n` +
+        `🌐 <a href="https://dailyjobs-portal.vercel.app">Visit Portal</a>`;
+
+      await sendTelegramMessage(chatId, stats, messageId);
+    } catch (err) {
+      await sendTelegramMessage(chatId, `❌ Failed to fetch stats: ${err.message}`, messageId);
+    }
+    return res.status(200).send("Stats command handled.");
   }
 
   const urls = extractUrls(text);

@@ -33,3 +33,17 @@ export function isWithinHours(dateString, hours = 24) {
   const now = new Date();
   return (now - date) / 3600000 <= hours;
 }
+
+// Returns expiry badge info: { label, colorClass, daysLeft }
+export function getExpiryInfo(expiresAt) {
+  if (!expiresAt) return null;
+  const now = new Date();
+  const exp = new Date(expiresAt);
+  const diffMs = exp - now;
+  if (diffMs <= 0) return { label: "Expired", colorClass: "bg-red-100 text-red-700 border-red-200 dark:bg-red-950/40 dark:text-red-400 dark:border-red-900/50", daysLeft: 0 };
+  const daysLeft = Math.ceil(diffMs / 86400000);
+  if (daysLeft <= 1) return { label: "Expires today", colorClass: "bg-red-100 text-red-700 border-red-200 dark:bg-red-950/40 dark:text-red-400 dark:border-red-900/50", daysLeft };
+  if (daysLeft <= 3) return { label: `Expires in ${daysLeft}d`, colorClass: "bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-950/40 dark:text-orange-400 dark:border-orange-900/50", daysLeft };
+  return { label: `Expires in ${daysLeft}d`, colorClass: "bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-900/50", daysLeft };
+}
+

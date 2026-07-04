@@ -1,0 +1,20 @@
+{
+  "name": "Daily Jobs Portal",
+  "short_name": "DailyJobs",
+  "description": "Find your next tech opportunity in India. Browse thousands of curated jobs daily.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#FF9900",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "lang": "en-IN"
+}

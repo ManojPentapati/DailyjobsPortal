@@ -4,7 +4,7 @@ import {
   MapPin, Clock, Briefcase, Banknote,
   Bookmark, BookmarkCheck, Building2, ArrowUpRight,
 } from "lucide-react";
-import { formatDistanceToNow, isWithinHours } from "../utils/dateUtils";
+import { formatDistanceToNow, isWithinHours, getExpiryInfo } from "../utils/dateUtils";
 import CompanyLogo from "../common/CompanyLogo";
 
 export default function JobCard({ job, compact = false }) {
@@ -13,6 +13,7 @@ export default function JobCard({ job, compact = false }) {
   });
   const navigate = useNavigate();
   const isNew = job.posted_date ? isWithinHours(job.posted_date, 24) : false;
+  const expiry = getExpiryInfo(job.expires_at);
 
   const toggleSave = (e) => {
     e.stopPropagation();
@@ -66,6 +67,7 @@ export default function JobCard({ job, compact = false }) {
       <div className="flex flex-wrap gap-1.5">
         {isNew && <span className="badge-new">● New</span>}
         {job.is_featured && <span className="badge-featured">★ Featured</span>}
+        {expiry && <span className={`px-2 py-0.5 rounded-md text-[11px] font-semibold border ${expiry.colorClass}`}>⏳ {expiry.label}</span>}
         <span className="badge-type">{job.category || job.type}</span>
         {job.job_type && (
           <span className="badge-type bg-sky-50 text-sky-700 border border-sky-200 dark:bg-sky-950/40 dark:text-sky-400 dark:border-sky-900/50">

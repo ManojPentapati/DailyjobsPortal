@@ -5,6 +5,7 @@ import { supabase } from "../../lib/supabase";
 
 // Static options that don't change based on data
 const STATIC_JOB_TYPES = ["Full-time", "Part-time", "Contract", "Internship", "Freelance"];
+const STATIC_SALARY_RANGES = ["0-5 LPA", "5-10 LPA", "10-20 LPA", "20+ LPA"];
 
 function FilterSection({ section, selected, onToggle, loading, initialOpen = false }) {
   const [open, setOpen] = useState(initialOpen);
@@ -117,6 +118,7 @@ export default function FilterSidebar({ onClose }) {
     { key: "type",       label: "Job Type",   options: STATIC_JOB_TYPES },
     { key: "category",   label: "Category",   options: dynamicOptions.category },
     { key: "company",    label: "Company",    options: dynamicOptions.company },
+    { key: "salary",     label: "Salary Range", options: STATIC_SALARY_RANGES },
     { key: "qualification", label: "Qualification", options: dynamicOptions.qualification },
     { key: "passout_year", label: "Passout Year", options: dynamicOptions.passout_year },
   ];

@@ -8,7 +8,7 @@ import {
 import { useJobs } from "../context/JobContext";
 import JobCard from "../components/jobs/JobCard";
 import EmptyState from "../components/common/EmptyState";
-import { formatDate, formatDistanceToNow, isWithinHours } from "../components/utils/dateUtils";
+import { formatDate, formatDistanceToNow, isWithinHours, getExpiryInfo } from "../components/utils/dateUtils";
 import CompanyLogo from "../components/common/CompanyLogo";
 import AdSlot from "../components/common/AdSlot";
 
@@ -70,6 +70,48 @@ export default function JobDetails() {
         tag.content = content;
       });
 
+      // JSON-LD Structured Data for Google for Jobs
+      const jsonLd = {
+        "@context": "https://schema.org/",
+        "@type": "JobPosting",
+        "title": job.title,
+        "description": job.description || `Apply for ${job.title} at ${job.company}.`,
+        "datePosted": job.posted_date || new Date().toISOString(),
+        "validThrough": job.expires_at || new Date(Date.now() + 7 * 86400000).toISOString(),
+        "hiringOrganization": {
+          "@type": "Organization",
+          "name": job.company,
+          ...(job.company_logo && { "logo": job.company_logo }),
+        },
+        "jobLocation": {
+          "@type": "Place",
+          "address": {
+            "@type": "PostalAddress",
+            "addressLocality": job.location || "India",
+            "addressCountry": "IN",
+          },
+        },
+        ...(job.salary && {
+          "baseSalary": {
+            "@type": "MonetaryAmount",
+            "currency": "INR",
+            "value": { "@type": "QuantitativeValue", "value": job.salary, "unitText": "YEAR" },
+          },
+        }),
+        "employmentType": job.job_type === "Full-time" ? "FULL_TIME" : job.job_type === "Part-time" ? "PART_TIME" : job.job_type === "Contract" ? "CONTRACTOR" : job.job_type === "Internship" ? "INTERN" : "FULL_TIME",
+        "qualifications": job.qualification || undefined,
+        "experienceRequirements": job.experience || undefined,
+      };
+
+      let ldScript = document.getElementById("job-jsonld");
+      if (!ldScript) {
+        ldScript = document.createElement("script");
+        ldScript.id = "job-jsonld";
+        ldScript.type = "application/ld+json";
+        document.head.appendChild(ldScript);
+      }
+      ldScript.textContent = JSON.stringify(jsonLd);
+
       window.scrollTo({ top: 0, behavior: "smooth" });
 
       // Cleanup to restore default home page SEO values on unmount
@@ -90,6 +132,10 @@ export default function JobDetails() {
           const t = document.querySelector(`meta[property="${prop}"]`);
           if (t) t.content = content;
         });
+
+        // Remove JSON-LD
+        const ld = document.getElementById("job-jsonld");
+        if (ld) ld.remove();
       };
     }
   }, [job]);
@@ -116,12 +162,13 @@ export default function JobDetails() {
   }
 
   const isNew = job.posted_date ? isWithinHours(job.posted_date, 24) : false;
+  const expiry = getExpiryInfo(job.expires_at);
 
   const shareUrl = window.location.href;
-  const shareText = `${job.title} at ${job.company} – Check it out!`;
+  const shareText = `🚀 *${job.title}* at *${job.company}*\n📍 ${job.location || "India"}\n💼 ${job.experience || "Freshers"}\n${job.salary ? `💰 ${job.salary}\n` : ""}🔗 Apply: ${shareUrl}\n\n— via Daily Jobs Portal`;
 
   const shareWhatsApp = () => {
-    window.open(`https://wa.me/?text=${encodeURIComponent(shareText + "\n" + shareUrl)}`, "_blank");
+    window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, "_blank");
     setShowShareMenu(false);
   };
   const shareLinkedIn = () => {
@@ -206,6 +253,7 @@ export default function JobDetails() {
               <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-2">
                 {isNew && <span className="badge-new">✦ New</span>}
                 {job.is_featured && <span className="badge-featured">★ Featured</span>}
+                {expiry && <span className={`px-2.5 py-0.5 rounded-lg text-xs font-semibold border ${expiry.colorClass}`}>⏳ {expiry.label}</span>}
                 <span className="badge-type">{job.category || job.type}</span>
               </div>
               <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold mb-2 sm:mb-1 break-words text-stone-900 dark:text-white">{job.title}</h1>

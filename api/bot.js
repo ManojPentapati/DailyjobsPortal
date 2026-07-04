@@ -240,6 +240,7 @@ Note: If the Crawled Pages Context lacks explicit skills or responsibilities, in
     }
 
     const insertedJobs = [];
+    let skippedCount = 0;
 
     // Local Helper: Generate a URL slug
     const generateSlug = (company, title) => {
@@ -254,6 +255,28 @@ Note: If the Crawled Pages Context lacks explicit skills or responsibilities, in
     for (const jobData of jobsData) {
       const logoUrl = await fetchLogoUrl(jobData.company);
       const jobSlug = generateSlug(jobData.company, jobData.title);
+
+      // Check for duplicate: same apply_link OR same slug (active jobs only)
+      const { data: existingByLink } = await supabase
+        .from("jobs")
+        .select("id")
+        .eq("apply_link", jobData.apply_link)
+        .eq("is_active", true)
+        .maybeSingle();
+
+      const { data: existingBySlug } = await supabase
+        .from("jobs")
+        .select("id")
+        .eq("slug", jobSlug)
+        .eq("is_active", true)
+        .maybeSingle();
+
+      if (existingByLink || existingBySlug) {
+        console.log(`Skipping duplicate job: ${jobData.title} at ${jobData.company}`);
+        skippedCount++;
+        continue;
+      }
+
       const expiresAt = new Date();
       expiresAt.setDate(expiresAt.getDate() + 30);
 
@@ -346,7 +369,12 @@ Note: If the Crawled Pages Context lacks explicit skills or responsibilities, in
     channelPost += `https://whatsapp.com/channel/0029VbCRYZN0Qeaep5uwNY3f`;
 
     // 4. Send final template response and delete original message to keep chat clean
-    await sendTelegramMessage(chatId, `✅ <b>Successfully posted ${insertedJobs.length} job(s) to website!</b>\n\nHere is your ready-to-use publication post (tap to copy):`);
+    let successMessage = `✅ <b>Successfully posted ${insertedJobs.length} job(s) to website!</b>`;
+    if (skippedCount > 0) {
+      successMessage += `\n⚠️ <b>Skipped ${skippedCount} duplicate job(s)</b> (already listed).`;
+    }
+    successMessage += `\n\nHere is your ready-to-use publication post (tap to copy):`;
+    await sendTelegramMessage(chatId, successMessage);
 
     // Send whatsAppPost in chunks if it exceeds 3500 characters
     const maxPostLength = 3500;

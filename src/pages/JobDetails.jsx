@@ -165,7 +165,7 @@ export default function JobDetails() {
   const expiry = getExpiryInfo(job.expires_at);
 
   const shareUrl = window.location.href;
-  const shareText = `🚀 *${job.title}* at *${job.company}*\n📍 ${job.location || "India"}\n💼 ${job.experience || "Freshers"}\n${job.salary ? `💰 ${job.salary}\n` : ""}🔗 Apply: ${shareUrl}\n\n— via Daily Jobs Portal`;
+  const shareText = `\ud83d\ude80 *${job.title}* at *${job.company}*\n\ud83d\udccd ${job.location || "India"}\n\ud83d\udcbc ${job.experience || "Freshers"}\n${job.salary ? `\ud83d\udcb0 ${job.salary}\n` : ""}\ud83d\udd17 Apply: ${shareUrl}\n\n\u2014 via Daily Jobs Portal`;
 
   const shareWhatsApp = () => {
     window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, "_blank");

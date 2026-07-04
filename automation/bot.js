@@ -245,19 +245,30 @@ Respond with a raw JSON array of job objects matching the exact schema below. Do
 Note: If the Crawled Pages Context lacks explicit skills or responsibilities, infer a logical list of 3-5 key skills and responsibilities based on the job title and company. Never leave them empty.
 `;
 
-    const modelsToTry = ["gemini-2.5-flash", "gemini-2.0-flash-lite", "gemini-flash-latest"];
+    const modelsToTry = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash-lite", "gemini-flash-latest"];
     let result = null;
     let geminiError = null;
+    const delay = (ms) => new Promise((r) => setTimeout(r, ms));
 
     for (const modelName of modelsToTry) {
-      try {
-        const model = ai.getGenerativeModel({ model: modelName });
-        result = await model.generateContent(prompt);
-        break; // Success! Break loop
-      } catch (err) {
-        console.error(`Gemini model ${modelName} failed:`, err.message);
-        geminiError = err;
+      for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+          const model = ai.getGenerativeModel({ model: modelName });
+          result = await model.generateContent(prompt);
+          break; // Success
+        } catch (err) {
+          console.error(`Gemini model ${modelName} (attempt ${attempt + 1}) failed:`, err.message);
+          geminiError = err;
+          // Retry same model once after 5s if it's a 503 (temporary overload)
+          if (attempt === 0 && err.message?.includes("503")) {
+            console.log(`Retrying ${modelName} in 5 seconds...`);
+            await delay(5000);
+            continue;
+          }
+          break; // Non-503 error, move to next model
+        }
       }
+      if (result) break;
     }
 
     if (!result) {

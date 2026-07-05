@@ -8,6 +8,7 @@ const navLinks = [
   { to: "/", label: "Home" },
   { to: "/jobs", label: "Find Jobs" },
   { to: "/categories", label: "Categories" },
+  { to: "/about", label: "About" },
   { to: "/saved-jobs", label: "Saved" },
   { to: "/contact", label: "Contact" },
 ];
@@ -100,13 +101,6 @@ export default function Navbar() {
                 <Search className="w-5 h-5" />
               </button>
 
-
-
-              {/* Admin CTA */}
-              <Link to="/admin/login" className="hidden sm:flex btn-primary text-xs py-2 px-4" id="nav-admin-btn">
-                Admin Panel
-              </Link>
-
               {/* Hamburger */}
               <button onClick={() => setMenuOpen(!menuOpen)} className="lg:hidden p-2 rounded-xl text-stone-500 dark:text-slate-400 hover:text-stone-900 dark:hover:text-white hover:bg-stone-100 dark:hover:bg-white/10 transition-all" aria-label="Toggle menu" id="nav-hamburger">
                 {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -137,10 +131,7 @@ export default function Navbar() {
                     className={({ isActive }) => isActive ? "nav-link-active block" : "nav-link block"}
                     onClick={() => setMenuOpen(false)}>{link.label}</NavLink>
                 ))}
-                <div className="pt-2 border-t border-stone-100 dark:border-stone-800 mt-1">
-                  <Link to="/admin/login" className="btn-primary w-full justify-center text-sm"
-                    onClick={() => setMenuOpen(false)} id="nav-admin-mobile">Admin Panel</Link>
-                </div>
+
               </div>
             </nav>
           )}

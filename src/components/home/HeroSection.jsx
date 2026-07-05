@@ -179,7 +179,7 @@ export default function HeroSection() {
             </div>
 
             {/* Trending */}
-            <div className="flex items-center gap-2 justify-center lg:justify-start overflow-x-auto no-scrollbar">
+            <div className="flex items-center gap-2 justify-center lg:justify-start overflow-x-auto no-scrollbar mb-8">
               <span className="text-slate-500 text-xs mt-1.5 flex-shrink-0 font-medium">Trending:</span>
               {trending.map((t) => (
                 <Link key={t} to={`/jobs?category=${encodeURIComponent(t)}`}
@@ -191,6 +191,24 @@ export default function HeroSection() {
                   {t}
                 </Link>
               ))}
+            </div>
+
+            {/* Trust Stats Bar */}
+            <div className="flex items-center gap-6 sm:gap-8 justify-center lg:justify-start pt-6 border-t border-white/[0.08]">
+              <div>
+                <p className="text-xl sm:text-2xl font-extrabold text-white">{totalJobs > 0 ? totalJobs : "120+"}</p>
+                <p className="text-[10px] sm:text-xs text-slate-400 font-semibold uppercase tracking-widest mt-0.5">Active Jobs</p>
+              </div>
+              <div className="w-px h-8 bg-white/[0.08]" />
+              <div>
+                <p className="text-xl sm:text-2xl font-extrabold text-white">50+</p>
+                <p className="text-[10px] sm:text-xs text-slate-400 font-semibold uppercase tracking-widest mt-0.5">Top Companies</p>
+              </div>
+              <div className="w-px h-8 bg-white/[0.08]" />
+              <div>
+                <p className="text-xl sm:text-2xl font-extrabold text-amber-400">100%</p>
+                <p className="text-[10px] sm:text-xs text-slate-400 font-semibold uppercase tracking-widest mt-0.5">Free to Apply</p>
+              </div>
             </div>
           </div>
 

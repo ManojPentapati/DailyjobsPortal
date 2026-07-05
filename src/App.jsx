@@ -10,6 +10,7 @@ import Categories from "./pages/Categories";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsConditions from "./pages/TermsConditions";
 import SavedJobs from "./pages/SavedJobs";
+import About from "./pages/About";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import JobFormPage from "./pages/admin/JobFormPage";
@@ -49,6 +50,7 @@ export default function App() {
       <Route path="/privacy" element={<PublicLayout><PrivacyPolicy /></PublicLayout>} />
       <Route path="/terms" element={<PublicLayout><TermsConditions /></PublicLayout>} />
       <Route path="/saved-jobs" element={<PublicLayout><SavedJobs /></PublicLayout>} />
+      <Route path="/about" element={<PublicLayout><About /></PublicLayout>} />
 
       {/* Admin routes */}
       <Route path="/admin/login" element={<AdminLogin />} />

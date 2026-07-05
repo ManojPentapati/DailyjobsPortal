@@ -9,7 +9,7 @@ export default function Categories() {
   const { adminJobs } = useJobs();
   useEffect(() => { document.title = "Job Categories – Daily Jobs Portal"; }, []);
 
-  const categoryStats = buildDynamicCategories(adminJobs);
+  const categoryStats = buildDynamicCategories(adminJobs).filter(c => c.count > 0);
 
   return (
     <main id="categories-page">

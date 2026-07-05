@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import HeroSection from "../components/home/HeroSection";
 import HowItWorks from "../components/home/HowItWorks";
+import RecentJobs from "../components/home/RecentJobs";
 import CategoriesSection from "../components/home/CategoriesSection";
 import NewsletterSection from "../components/home/NewsletterSection";
 
@@ -12,6 +13,7 @@ export default function Home() {
   return (
     <main id="main-content">
       <HeroSection />
+      <RecentJobs />
       <HowItWorks />
       <CategoriesSection />
       <NewsletterSection />

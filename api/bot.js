@@ -236,8 +236,8 @@ Respond with a raw JSON array of job objects matching the exact schema below. Do
   {
     "title": "Job Title (e.g. System Engineer / Specialist Programmer)",
     "company": "Company Name (e.g. Infosys)",
-    "location": "Job Location (e.g. Chennai, Bangalore or Across India)",
-    "experience": "Experience Requirement (e.g. Freshers, 0-2 years)",
+    "location": "Job Location — use standard city names: Bangalore, Hyderabad, Chennai, Mumbai, Pune, Delhi, Noida, Gurgaon, Kolkata, Remote, Across India. Always use 'Bangalore' (not BENGALURU/Bengaluru). If multiple cities, list the primary one only.",
+    "experience": "Experience Requirement — use ONLY these standard values: Freshers, 0-1 Years, 0-2 Years, 1-3 Years, 2-5 Years, 3-5 Years, 5-8 Years, 8+ Years. Map '0 years' or '0-0 years' to 'Freshers'.",
     "salary": "Salary (e.g. Rs. 6.25 - 21 LPA or Upto 8 LPA)",
     "category": "One of these exact categories: Software Development, Data Science, AI / ML, Testing / QA, Cloud Computing, Cyber Security, UI/UX Design, DevOps & Cloud, Product Management, Design",
     "description": "Full job description (1-2 paragraphs summarizing the role details, responsibilities, and requirements)",
@@ -251,6 +251,7 @@ Respond with a raw JSON array of job objects matching the exact schema below. Do
 ]
 
 Note: If the Crawled Pages Context lacks explicit skills or responsibilities, infer a logical list of 3-5 key skills and responsibilities based on the job title and company. Never leave them empty.
+IMPORTANT: Always normalize location to standard city names and experience to standard ranges as specified above. Consistency is critical.
 `;
 
     const modelsToTry = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash-lite", "gemini-flash-latest"];

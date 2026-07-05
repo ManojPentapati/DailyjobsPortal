@@ -7,7 +7,7 @@ import { useJobs } from "../../context/JobContext";
 export default function CategoriesSection() {
   const { adminJobs } = useJobs();
 
-  const categoryStats = buildDynamicCategories(adminJobs);
+  const categoryStats = buildDynamicCategories(adminJobs).filter(c => c.count > 0);
 
   return (
     <section className="py-12 sm:py-16 lg:py-20 bg-stone-50 dark:bg-[#0f1d32]" aria-labelledby="categories-heading" id="categories-section">

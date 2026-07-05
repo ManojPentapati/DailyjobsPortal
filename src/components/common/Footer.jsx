@@ -5,10 +5,10 @@ const quickLinks = [
   { to: "/", label: "Home" },
   { to: "/jobs", label: "Browse Jobs" },
   { to: "/categories", label: "Categories" },
+  { to: "/about", label: "About Us" },
   { to: "/contact", label: "Contact" },
   { to: "/privacy", label: "Privacy Policy" },
   { to: "/terms", label: "Terms of Service" },
-  { to: "/admin/login", label: "Admin Panel" },
 ];
 
 const categories = [
@@ -120,7 +120,7 @@ export default function Footer() {
               in India
             </p>
 
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-2">
               <a
                 href="https://whatsapp.com/channel/0029VbCRYZN0Qeaep5uwNY3f"
                 target="_blank"
@@ -133,6 +133,20 @@ export default function Footer() {
               >
                 <svg viewBox="0 0 32 32" fill="currentColor" className="w-4 h-4" aria-hidden="true">
                   <path d="M16.004 2.667A13.28 13.28 0 0 0 2.667 15.89a13.18 13.18 0 0 0 1.78 6.633L2.667 29.333l7.04-1.845A13.28 13.28 0 0 0 16.004 29.2 13.28 13.28 0 0 0 29.333 15.89 13.28 13.28 0 0 0 16.004 2.667Zm0 24.266a11.01 11.01 0 0 1-5.613-1.534l-.403-.24-4.176 1.095 1.115-4.072-.263-.418a10.94 10.94 0 0 1-1.68-5.874A11.02 11.02 0 0 1 16.004 4.93 11.02 11.02 0 0 1 27.07 15.89a11.02 11.02 0 0 1-11.066 11.043Zm6.064-8.275c-.332-.167-1.968-.97-2.273-1.082-.305-.112-.527-.167-.75.167-.221.333-.86 1.082-1.054 1.304-.194.222-.389.25-.721.083-.333-.167-1.404-.517-2.674-1.65-.988-.88-1.656-1.968-1.85-2.3-.194-.333-.02-.513.146-.679.15-.149.333-.389.5-.583.166-.194.221-.333.333-.555.111-.222.055-.417-.028-.583-.083-.167-.75-1.806-1.027-2.472-.271-.65-.546-.561-.75-.572l-.638-.011a1.225 1.225 0 0 0-.888.417c-.305.333-1.166 1.138-1.166 2.775 0 1.638 1.194 3.22 1.36 3.443.166.222 2.35 3.588 5.695 5.032.796.344 1.417.55 1.902.703.799.254 1.527.218 2.102.132.641-.095 1.968-.804 2.246-1.581.277-.778.277-1.444.194-1.583-.083-.14-.305-.222-.638-.389Z" />
+                </svg>
+              </a>
+              <a
+                href="https://t.me/DailyJobsUpdatesportal"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Telegram Channel"
+                title="Join our Telegram Channel"
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-white transition-all duration-200 hover:-translate-y-0.5"
+                style={{ background: "#0088cc" }}
+                id="footer-social-telegram"
+              >
+                <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4" aria-hidden="true">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-1-.65-.35-1 .22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.12.02-1.96 1.24-5.54 3.65-.52.36-.97.53-1.33.52-.4-.01-1.18-.23-1.76-.42-.71-.23-1.27-.35-1.22-.75.02-.21.31-.42.86-.64 3.37-1.47 5.62-2.44 6.74-2.91 3.2-1.33 3.86-1.56 4.3-.16-.01.1.09.2.14.3-.01.07.01.14-.01.21z"/>
                 </svg>
               </a>
             </div>

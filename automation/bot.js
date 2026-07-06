@@ -449,7 +449,7 @@ IMPORTANT: Always normalize location to standard city names and experience to st
       }
       channelPost += `━━━━━━━━━━━━━━━━━━━━\n`;
       channelPost += `🚀 <b>Apply Link:</b> ${jobUrl}\n`;
-      channelPost += `⏰ <b>Apply ASAP! Link expires in 7 days.</b>\n\n\n`;
+      channelPost += `⏰ <b>Apply ASAP! Link expires in ${job.expires_in_days || 7} days.</b>\n\n\n`;
     });
     channelPost += `<b>📢 Share this opportunity with your Friends and WhatsApp Group ❤️</b>\n\n`;
     channelPost += `<b>🌐 Search more tech jobs on our website:</b>\n`;

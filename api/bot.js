@@ -140,6 +140,20 @@ async function deleteTelegramMessage(chatId, messageId) {
   }
 }
 
+// Helper: Clean up expired jobs automatically
+async function cleanExpiredJobs() {
+  try {
+    const now = new Date().toISOString();
+    const { error } = await supabase
+      .from("jobs")
+      .delete()
+      .lt("expires_at", now);
+    if (error) console.error("Error deleting expired jobs:", error.message);
+  } catch (err) {
+    console.error("Failed to cleanup expired jobs:", err.message);
+  }
+}
+
 // Vercel Serverless Function Handler
 export default async function handler(req, res) {
   // Verify request is POST (from Telegram Webhook)
@@ -162,6 +176,9 @@ export default async function handler(req, res) {
     await sendTelegramMessage(chatId, `❌ Unauthorized. Your Telegram User ID is: <b>${userId}</b>\nTo gain access, add this ID to ALLOWED_USER_IDS in Vercel.`, messageId);
     return res.status(200).send("Unauthorized.");
   }
+
+  // Run database maintenance to remove expired jobs
+  await cleanExpiredJobs();
 
   // Handle start command
   if (text.startsWith("/start")) {

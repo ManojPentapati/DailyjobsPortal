@@ -159,6 +159,20 @@ const fetchLogoUrl = async (companyName) => {
   return `https://www.google.com/s2/favicons?sz=64&domain=${cleanDomain}&fallback=sitemap`;
 };
 
+// Helper: Clean up expired jobs automatically
+async function cleanExpiredJobs() {
+  try {
+    const now = new Date().toISOString();
+    const { error } = await supabase
+      .from("jobs")
+      .delete()
+      .lt("expires_at", now);
+    if (error) console.error("Error deleting expired jobs:", error.message);
+  } catch (err) {
+    console.error("Failed to cleanup expired jobs:", err.message);
+  }
+}
+
 // Bot main handler
 bot.on("message", async (msg) => {
   const chatId = msg.chat.id;
@@ -169,6 +183,9 @@ bot.on("message", async (msg) => {
   if (allowedIds.length && !allowedIds.includes(userId)) {
     return bot.sendMessage(chatId, `❌ Unauthorized. Your Telegram User ID is: <b>${userId}</b>\nTo gain access, add this ID to ALLOWED_USER_IDS in your .env file.`, { parse_mode: "HTML" });
   }
+
+  // Run database maintenance to remove expired jobs
+  await cleanExpiredJobs();
 
   // Handle start command
   if (text.startsWith("/start")) {

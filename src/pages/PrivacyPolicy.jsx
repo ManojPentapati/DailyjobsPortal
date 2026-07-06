@@ -10,16 +10,18 @@ export default function PrivacyPolicy() {
 
   return (
     <main className="min-h-screen py-12 px-4 sm:px-6 lg:px-8 bg-slate-50 dark:bg-stone-950/20" id="privacy-policy-page">
-      <div className="max-w-4xl mx-auto bg-white dark:bg-stone-900 border border-slate-200/80 dark:border-white/[0.06] rounded-3xl p-6 sm:p-10 lg:p-12 shadow-md">
-        
-        {/* Back Button */}
+      <div className="max-w-4xl mx-auto mb-6">
         <Link
           to="/jobs"
-          className="inline-flex items-center gap-2 text-stone-500 hover:text-stone-900 dark:text-slate-400 dark:hover:text-white transition-colors mb-6 text-sm min-h-[44px]"
+          className="inline-flex items-center gap-1.5 text-sm text-stone-500 hover:text-stone-900 dark:text-slate-400 dark:hover:text-white transition-colors"
           id="privacy-back-btn"
         >
-          <ArrowLeft className="w-4 h-4" /> Back to Jobs
+          <ArrowLeft className="w-4 h-4" /> Back
         </Link>
+      </div>
+
+      <div className="max-w-4xl mx-auto bg-white dark:bg-stone-900 border border-slate-200/80 dark:border-white/[0.06] rounded-3xl p-6 sm:p-10 lg:p-12 shadow-md">
+        
         {/* Header */}
         <div className="flex items-center gap-3.5 mb-8 pb-6 border-b border-slate-100 dark:border-slate-800">
           <div className="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200/50 dark:border-amber-900/30 flex items-center justify-center text-amber-500">

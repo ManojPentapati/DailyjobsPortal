@@ -3,6 +3,7 @@ import HeroSection from "../components/home/HeroSection";
 import HowItWorks from "../components/home/HowItWorks";
 import RecentJobs from "../components/home/RecentJobs";
 import CategoriesSection from "../components/home/CategoriesSection";
+import FAQSection from "../components/home/FAQSection";
 import NewsletterSection from "../components/home/NewsletterSection";
 
 export default function Home() {
@@ -16,6 +17,7 @@ export default function Home() {
       <RecentJobs />
       <HowItWorks />
       <CategoriesSection />
+      <FAQSection />
       <NewsletterSection />
     </main>
   );

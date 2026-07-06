@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   MapPin, Clock, Briefcase, Banknote,
-  Bookmark, BookmarkCheck, Building2, ArrowUpRight,
+  Bookmark, BookmarkCheck, Building2, ArrowUpRight, Share2
 } from "lucide-react";
 import { formatDistanceToNow, isWithinHours, getExpiryInfo } from "../utils/dateUtils";
 import CompanyLogo from "../common/CompanyLogo";
@@ -21,6 +21,13 @@ export default function JobCard({ job, compact = false }) {
     const updated = saved ? ids.filter((i) => i !== job.id) : [...ids, job.id];
     localStorage.setItem("savedJobs", JSON.stringify(updated));
     setSaved(!saved);
+  };
+
+  const handleShare = (e) => {
+    e.stopPropagation();
+    const shareUrl = `${window.location.origin}/jobs/${job.id}`;
+    const shareText = `\ud83d\ude80 *${job.title}* at *${job.company}*\n\ud83d\udccd ${job.location || "India"}\n\ud83d\udcbc ${job.experience || "Freshers"}\n${job.salary ? `\ud83d\udcb0 ${job.salary}\n` : ""}\ud83d\udd17 Apply: ${shareUrl}\n\n\u2014 via Daily Jobs Portal`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, "_blank");
   };
 
   return (
@@ -50,17 +57,30 @@ export default function JobCard({ job, compact = false }) {
           </div>
         </div>
 
-        {/* Save */}
-        <button
-          onClick={toggleSave}
-          aria-label={saved ? "Unsave" : "Save job"}
-          className="flex-shrink-0 p-1.5 rounded-lg text-slate-300 dark:text-slate-600 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 transition-all"
-          id={`save-job-${job.id}`}
-        >
-          {saved
-            ? <BookmarkCheck className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-            : <Bookmark className="w-4 h-4" />}
-        </button>
+        {/* Actions (Save & Share) */}
+        <div className="flex items-center gap-1 flex-shrink-0">
+          <button
+            onClick={handleShare}
+            aria-label="Share to WhatsApp"
+            title="Share to WhatsApp"
+            className="p-1.5 rounded-lg text-slate-350 dark:text-slate-600 hover:text-emerald-500 dark:hover:text-emerald-450 hover:bg-emerald-50 dark:hover:bg-emerald-950/20 transition-all"
+            id={`share-job-${job.id}`}
+          >
+            <Share2 className="w-4 h-4" />
+          </button>
+          <button
+            onClick={toggleSave}
+            aria-label={saved ? "Unsave" : "Save job"}
+            className="p-1.5 rounded-lg text-slate-300 dark:text-slate-600 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 transition-all"
+            id={`save-job-${job.id}`}
+          >
+            {saved ? (
+              <BookmarkCheck className="w-4 h-4 text-amber-500 fill-amber-500" />
+            ) : (
+              <Bookmark className="w-4 h-4" />
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Badges */}

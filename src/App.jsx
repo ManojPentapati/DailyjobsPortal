@@ -2,6 +2,7 @@ import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import Navbar from "./components/common/Navbar";
 import Footer from "./components/common/Footer";
 import WhatsAppFloat from "./components/common/WhatsAppFloat";
+import PWAInstallPrompt from "./components/common/PWAInstallPrompt";
 import Home from "./pages/Home";
 import JobListings from "./pages/JobListings";
 import JobDetails from "./pages/JobDetails";
@@ -23,6 +24,7 @@ function PublicLayout({ children }) {
       <div className="flex-1">{children}</div>
       <Footer />
       <WhatsAppFloat />
+      <PWAInstallPrompt />
     </div>
   );
 }

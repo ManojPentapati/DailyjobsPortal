@@ -263,7 +263,8 @@ Respond with a raw JSON array of job objects matching the exact schema below. Do
     "qualification": "Highly concise qualification label (e.g. B.E/B.Tech, MCA, B.Sc, BCA, Any Degree, BBA, MBA, M.Tech). Do NOT write a sentence. Keep it to a clean, simple short label.",
     "passout_year": "Comma separated years (e.g. 2024, 2025, 2026). If open to any, say Any",
     "job_type": "One of: Full-time, Part-time, Contract, Internship, Freelance",
-    "apply_link": "The REAL official apply link found on its corresponding crawled page (e.g. a docs.google.com/forms link or infosys.com career link). Do NOT use the wrapper link. If not found, output the best alternative from the crawled page."
+    "apply_link": "The REAL official apply link found on its corresponding crawled page (e.g. a docs.google.com/forms link or infosys.com career link). Do NOT use the wrapper link. If not found, output the best alternative from the crawled page.",
+    "expires_in_days": "Number of days until the job application link expires, estimated based on any text mentioning deadline, urgency, or expiration (e.g. 3, 5, 7). If no explicit mention of deadline/urgency/expiration, default to 7."
   }
 ]
 
@@ -351,8 +352,9 @@ IMPORTANT: Always normalize location to standard city names and experience to st
         continue;
       }
 
+      const days = parseInt(jobData.expires_in_days) || 7;
       const expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + 7);
+      expiresAt.setDate(expiresAt.getDate() + days);
 
       const { data: inserted, error: dbError } = await supabase
         .from("jobs")
@@ -380,7 +382,7 @@ IMPORTANT: Always normalize location to standard city names and experience to st
         .single();
 
       if (!dbError && inserted) {
-        insertedJobs.push({ ...jobData, slug: inserted.slug || jobSlug });
+        insertedJobs.push({ ...jobData, slug: inserted.slug || jobSlug, expires_in_days: days });
       } else {
         console.error(`Failed to insert job for ${jobData.company}:`, dbError);
       }
@@ -415,7 +417,7 @@ IMPORTANT: Always normalize location to standard city names and experience to st
       }
       whatsAppPost += `━━━━━━━━━━━━━━━━━━━━\n`;
       whatsAppPost += `🚀 *Apply Link:* ${jobUrl}\n`;
-      whatsAppPost += `⏰ *Apply ASAP! Link expires in 7 days.*\n\n\n`;
+      whatsAppPost += `⏰ *Apply ASAP! Link expires in ${job.expires_in_days || 7} days.*\n\n\n`;
     });
     whatsAppPost += `*📢 Share this opportunity with your Friends and WhatsApp Group ❤️*\n\n`;
     whatsAppPost += `*🌐 Search more tech jobs on our website:* \n`;

@@ -50,7 +50,7 @@ function useTypingEffect(words, typingSpeed = 100, deleteSpeed = 60, pauseDurati
 }
 
 export default function HeroSection() {
-  const { allActiveCount } = useJobs();
+  const { allActiveCount, uniqueCompaniesCount } = useJobs();
   const [topCategories, setTopCategories] = useState([]);
   const [activeRole, setActiveRole] = useState(0);
   const [isLeaving, setIsLeaving] = useState(false);
@@ -201,7 +201,7 @@ export default function HeroSection() {
               </div>
               <div className="w-px h-8 bg-white/[0.08]" />
               <div>
-                <p className="text-xl sm:text-2xl font-extrabold text-white">50+</p>
+                <p className="text-xl sm:text-2xl font-extrabold text-white">{uniqueCompaniesCount > 0 ? `${uniqueCompaniesCount}+` : "50+"}</p>
                 <p className="text-[10px] sm:text-xs text-slate-400 font-semibold uppercase tracking-widest mt-0.5">Top Companies</p>
               </div>
               <div className="w-px h-8 bg-white/[0.08]" />

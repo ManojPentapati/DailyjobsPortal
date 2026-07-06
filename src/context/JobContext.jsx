@@ -26,6 +26,7 @@ export function JobProvider({ children }) {
   const [paginatedJobs, setPaginatedJobs] = useState([]);
   const [totalJobs, setTotalJobs] = useState(0);
   const [allActiveCount, setAllActiveCount] = useState(0);
+  const [uniqueCompaniesCount, setUniqueCompaniesCount] = useState(0);
   const [loading, setLoading] = useState(false);
 
   // Helper to construct Supabase query based on current filters
@@ -72,14 +73,16 @@ export function JobProvider({ children }) {
       if (countError) throw countError;
       setTotalJobs(count || 0);
 
-      // Fetch absolute count of all active non-expired jobs (unfiltered)
-      const { count: activeCount, error: activeError } = await supabase
+      // Fetch all active non-expired jobs (selecting only company to keep it fast)
+      const { data: activeJobsData, error: activeError } = await supabase
         .from("jobs")
-        .select("*", { count: "exact", head: true })
+        .select("company")
         .eq("is_active", true)
         .gt("expires_at", new Date().toISOString());
-      if (!activeError) {
-        setAllActiveCount(activeCount || 0);
+      if (!activeError && activeJobsData) {
+        setAllActiveCount(activeJobsData.length || 0);
+        const uniqueCos = new Set(activeJobsData.map(j => j.company?.toLowerCase().trim()).filter(Boolean));
+        setUniqueCompaniesCount(uniqueCos.size || 0);
       }
 
       // 2. Get paginated data
@@ -236,6 +239,7 @@ export function JobProvider({ children }) {
         loading,
         totalJobs,
         allActiveCount,
+        uniqueCompaniesCount,
       }}
     >
       {children}

@@ -167,8 +167,8 @@ export default function FilterSidebar({ onClose }) {
           section={section}
           selected={filters[section.key] || []}
           onToggle={handleToggle}
-          loading={loading && section.key !== "type"}
-          initialOpen={["location", "experience", "type"].includes(section.key)}
+          loading={loading && section.key !== "type" && section.key !== "salary"}
+          initialOpen={false}
         />
       ))}
     </aside>

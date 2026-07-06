@@ -11,6 +11,7 @@ import EmptyState from "../components/common/EmptyState";
 import { formatDate, formatDistanceToNow, isWithinHours, getExpiryInfo } from "../components/utils/dateUtils";
 import CompanyLogo from "../components/common/CompanyLogo";
 import AdSlot from "../components/common/AdSlot";
+import SearchBar from "../components/common/SearchBar";
 
 export default function JobDetails() {
   const { id } = useParams();
@@ -146,17 +147,44 @@ export default function JobDetails() {
 
   if (!job) {
     return (
-      <main className="max-w-4xl mx-auto px-4 py-20" id="job-not-found">
-        <EmptyState
-          variant="search"
-          title="Job Not Found"
-          description="This job listing may have been removed or the link is incorrect."
-          action={
-            <Link to="/jobs" className="btn-primary">
-              Browse All Jobs
+      <main className="max-w-3xl mx-auto px-4 py-16 sm:py-24 text-center" id="job-expired-page">
+        <div className="card p-6 sm:p-10 border border-slate-200 dark:border-stone-800 bg-white dark:bg-[#0f1d32] rounded-2xl shadow-xl max-w-xl mx-auto">
+          {/* Expired Badge */}
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-red-550/10 text-red-500 mb-6">
+            <Clock className="w-8 h-8 animate-pulse" />
+          </div>
+          
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-stone-900 dark:text-white mb-3">
+            This Job Opportunity Has Expired
+          </h1>
+          <p className="text-sm sm:text-base text-stone-500 dark:text-slate-400 leading-relaxed mb-8">
+            To ensure data quality, expired and inactive job applications are automatically cleared. Don't worry—new jobs are added daily!
+          </p>
+
+          {/* Dynamic Search Bar */}
+          <div className="w-full mb-8" id="expired-job-search">
+            <p className="text-xs font-semibold text-stone-600 dark:text-slate-350 text-left mb-2 uppercase tracking-wider">Search for alternative jobs:</p>
+            <SearchBar placeholder="Try searching 'Google', 'Python', 'Freshers'..." />
+          </div>
+
+          {/* Action buttons */}
+          <div className="flex flex-col sm:flex-row items-center gap-3 justify-center">
+            <Link
+              to="/jobs"
+              className="btn-primary w-full sm:w-auto text-sm py-2.5 px-6 rounded-xl flex items-center justify-center gap-2"
+            >
+              <ArrowLeft className="w-4 h-4" /> Back to All Jobs
             </Link>
-          }
-        />
+            <a
+              href="https://whatsapp.com/channel/0029VbCRYZN0Qeaep5uwNY3f"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-secondary w-full sm:w-auto text-sm py-2.5 px-6 rounded-xl flex items-center justify-center gap-2 border border-emerald-500/20 text-emerald-500 hover:bg-emerald-500/5"
+            >
+              🚀 Join WhatsApp Channel
+            </a>
+          </div>
+        </div>
       </main>
     );
   }

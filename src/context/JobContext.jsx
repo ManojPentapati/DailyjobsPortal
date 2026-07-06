@@ -25,6 +25,7 @@ export function JobProvider({ children }) {
   const [filteredJobs, setFilteredJobs] = useState([]);
   const [paginatedJobs, setPaginatedJobs] = useState([]);
   const [totalJobs, setTotalJobs] = useState(0);
+  const [allActiveCount, setAllActiveCount] = useState(0);
   const [loading, setLoading] = useState(false);
 
   // Helper to construct Supabase query based on current filters
@@ -70,6 +71,16 @@ export function JobProvider({ children }) {
       const { count, error: countError } = await countQuery;
       if (countError) throw countError;
       setTotalJobs(count || 0);
+
+      // Fetch absolute count of all active non-expired jobs (unfiltered)
+      const { count: activeCount, error: activeError } = await supabase
+        .from("jobs")
+        .select("*", { count: "exact", head: true })
+        .eq("is_active", true)
+        .gt("expires_at", new Date().toISOString());
+      if (!activeError) {
+        setAllActiveCount(activeCount || 0);
+      }
 
       // 2. Get paginated data
       let dataQuery = buildQuery();
@@ -224,6 +235,7 @@ export function JobProvider({ children }) {
         adminJobs,
         loading,
         totalJobs,
+        allActiveCount,
       }}
     >
       {children}

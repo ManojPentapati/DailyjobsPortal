@@ -50,7 +50,7 @@ function useTypingEffect(words, typingSpeed = 100, deleteSpeed = 60, pauseDurati
 }
 
 export default function HeroSection() {
-  const { totalJobs } = useJobs();
+  const { allActiveCount } = useJobs();
   const [topCategories, setTopCategories] = useState([]);
   const [activeRole, setActiveRole] = useState(0);
   const [isLeaving, setIsLeaving] = useState(false);
@@ -154,7 +154,7 @@ export default function HeroSection() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
               </span>
-              {totalJobs > 0 ? `${totalJobs} active jobs available` : "New jobs posted daily"}
+              {allActiveCount > 0 ? `${allActiveCount} active jobs available` : "New jobs posted daily"}
             </div>
 
             {/* Heading with typing effect */}
@@ -196,7 +196,7 @@ export default function HeroSection() {
             {/* Trust Stats Bar */}
             <div className="flex items-center gap-6 sm:gap-8 justify-center lg:justify-start pt-6 border-t border-white/[0.08]">
               <div>
-                <p className="text-xl sm:text-2xl font-extrabold text-white">{totalJobs > 0 ? totalJobs : "120+"}</p>
+                <p className="text-xl sm:text-2xl font-extrabold text-white">{allActiveCount > 0 ? allActiveCount : "120+"}</p>
                 <p className="text-[10px] sm:text-xs text-slate-400 font-semibold uppercase tracking-widest mt-0.5">Active Jobs</p>
               </div>
               <div className="w-px h-8 bg-white/[0.08]" />

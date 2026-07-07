@@ -25,7 +25,7 @@ const faqs = [
 ];
 
 function FAQItem({ q, a, index }) {
-  const [isOpen, setIsOpen] = useState(index === 0);
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <div className="border-b border-stone-200 dark:border-white/[0.08] py-4 last:border-0">

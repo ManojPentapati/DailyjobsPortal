@@ -1,4 +1,4 @@
-const CACHE_NAME = "dailyjobs-v14";
+const CACHE_NAME = "dailyjobs-v15";
 const STATIC_ASSETS = ["/", "/favicon.svg"];
 
 // Install: cache essential assets

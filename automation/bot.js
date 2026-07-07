@@ -139,7 +139,15 @@ const fetchLogoUrl = async (companyName) => {
   };
 
   const normalized = companyName.toLowerCase().trim().replace(/[^a-z0-9]/g, "");
-  let domain = companyDomains[normalized] || `${companyName.toLowerCase().trim().replace(/\s+/g, "")}.com`;
+  const cleanName = companyName.toLowerCase().trim().replace(/\s+/g, "");
+  let domain = companyDomains[normalized];
+  if (!domain) {
+    if (/\.(com|in|co|ai|io|org|net|me|info|tech|us|edu|gov)$/i.test(cleanName)) {
+      domain = cleanName;
+    } else {
+      domain = `${cleanName}.com`;
+    }
+  }
 
   try {
     const res = await axios.get(`https://autocomplete.clearbit.com/v1/companies/suggest?query=${encodeURIComponent(companyName)}`, { timeout: 3000 });
@@ -156,7 +164,7 @@ const fetchLogoUrl = async (companyName) => {
   }
 
   const cleanDomain = domain.replace(/^(https?:)?\/\//, "").trim();
-  return `https://t2.gstatic.com/faviconV2?client=gcom&size=64&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://${cleanDomain}`;
+  return `https://t2.gstatic.com/faviconV2?client=gcom&size=64&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${encodeURIComponent("https://" + cleanDomain)}`;
 };
 
 // Helper: Clean up expired jobs automatically

@@ -26,7 +26,7 @@ export function resolveLogo(logo) {
   domain = domain.replace(/\.ico$/, "").replace(/\.com\.com$/, ".com");
 
   if (domain && domain.includes(".") && domain.length > 3) {
-    return `https://t2.gstatic.com/faviconV2?client=gcom&size=64&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://${domain}`;
+    return `https://t2.gstatic.com/faviconV2?client=gcom&size=64&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${encodeURIComponent("https://" + domain)}`;
   }
   return null; // Triggers dynamic letter fallback in UI
 }

@@ -8,7 +8,7 @@ import {
 import { useJobs } from "../context/JobContext";
 import JobCard from "../components/jobs/JobCard";
 import EmptyState from "../components/common/EmptyState";
-import { formatDate, formatDistanceToNow, isWithinHours, getExpiryInfo } from "../components/utils/dateUtils";
+import { formatDate, formatDistanceToNow, isWithinHours, getExpiryInfo, getApplyTimeInfo } from "../components/utils/dateUtils";
 import CompanyLogo from "../components/common/CompanyLogo";
 import AdSlot from "../components/common/AdSlot";
 import SearchBar from "../components/common/SearchBar";
@@ -183,6 +183,7 @@ export default function JobDetails() {
 
   const isNew = job.posted_date ? isWithinHours(job.posted_date, 24) : false;
   const expiry = getExpiryInfo(job.expires_at);
+  const applyTimeInfo = getApplyTimeInfo(job.apply_link);
 
   const shareUrl = window.location.href;
   const shareText = `\ud83d\ude80 *${job.title}* at *${job.company}*\n\ud83d\udccd ${job.location || "India"}\n\ud83d\udcbc ${job.experience || "Freshers"}\n${job.salary ? `\ud83d\udcb0 ${job.salary}\n` : ""}\ud83d\udd17 Apply: ${shareUrl}\n\n\u2014 via Daily Jobs Portal`;
@@ -274,6 +275,7 @@ export default function JobDetails() {
                 {isNew && <span className="badge-new">✦ New</span>}
                 {job.is_featured && <span className="badge-featured">★ Featured</span>}
                 {expiry && <span className={`px-2.5 py-0.5 rounded-lg text-xs font-semibold border ${expiry.colorClass}`}>⏳ {expiry.label}</span>}
+                {applyTimeInfo && <span className={`px-2.5 py-0.5 rounded-lg text-xs font-semibold border ${applyTimeInfo.colorClass}`}>⏱️ {applyTimeInfo.label}</span>}
                 <span className="badge-type">{job.category || job.type}</span>
               </div>
               <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold mb-2 sm:mb-1 break-words text-stone-900 dark:text-white">{job.title}</h1>

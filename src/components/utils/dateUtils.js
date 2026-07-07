@@ -47,3 +47,32 @@ export function getExpiryInfo(expiresAt) {
   return { label: `Expires in ${daysLeft}d`, colorClass: "bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-900/50", daysLeft };
 }
 
+// Returns estimated application time info: { label, colorClass }
+export function getApplyTimeInfo(applyLink) {
+  if (!applyLink) return null;
+  const link = applyLink.toLowerCase();
+  
+  if (link.includes("docs.google.com/forms") || link.includes("forms.gle") || link.startsWith("mailto:")) {
+    return { 
+      label: "1-Min Apply", 
+      colorClass: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-900/50" 
+    };
+  }
+  if (link.includes("greenhouse.io") || link.includes("lever.co")) {
+    return { 
+      label: "2-Min Apply", 
+      colorClass: "bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-950/40 dark:text-sky-400 dark:border-sky-900/50" 
+    };
+  }
+  if (link.includes("workday") || link.includes("myworkdayjobs") || link.includes("smartrecruiters.com")) {
+    return { 
+      label: "4-Min Apply", 
+      colorClass: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-900/50" 
+    };
+  }
+  return { 
+    label: "3-Min Apply", 
+    colorClass: "bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-800/40 dark:text-slate-350 dark:border-slate-700/50" 
+  };
+}
+

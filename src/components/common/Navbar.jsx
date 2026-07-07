@@ -98,7 +98,7 @@ export default function Navbar() {
                 <input type="text" value={query} onChange={(e) => setQuery(e.target.value)}
                   placeholder="Search jobs..."
                   className="bg-transparent text-sm text-stone-700 dark:text-slate-200 placeholder-stone-400 dark:placeholder-slate-500 outline-none w-full"
-                  id="nav-search-input" />
+                  id="nav-search-input" name="query" />
               </form>
 
               {/* Mobile search */}
@@ -120,7 +120,7 @@ export default function Navbar() {
                 style={{ background: "rgba(255,153,0,0.08)", border: "1px solid rgba(255,153,0,0.2)" }}>
                 <Search className="w-4 h-4 text-amber-500 flex-shrink-0" />
                 <input ref={searchRef} type="text" value={query} onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search jobs, companies, skills..." id="nav-search-mobile"
+                  placeholder="Search jobs, companies, skills..." id="nav-search-mobile" name="query"
                   className="bg-transparent text-sm text-stone-700 dark:text-slate-200 placeholder-stone-400 dark:placeholder-slate-500 outline-none flex-1" />
                 {query && <button type="submit" className="btn-primary py-1 px-3 text-xs">Go</button>}
               </form>

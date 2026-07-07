@@ -47,6 +47,8 @@ function FilterSection({ section, selected, onToggle, loading, initialOpen = fal
               >
                 <input
                   type="checkbox"
+                  id={`checkbox-${section.key}-${opt.toLowerCase().replace(/\s/g, "-")}`}
+                  name={`${section.key}-${opt.toLowerCase().replace(/\s/g, "-")}`}
                   checked={selected.includes(opt)}
                   onChange={(e) => onToggle(section.key, opt, e.target.checked)}
                   className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-amber-500 focus:ring-amber-500"

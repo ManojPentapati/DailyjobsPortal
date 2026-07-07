@@ -51,6 +51,8 @@ export default function SearchBar({ large = false, placeholder = "Job title, com
           <MapPin className="w-4 h-4 text-slate-400" />
           <input
             type="text"
+            id="location-search-input"
+            name="location"
             value={location}
             onChange={(e) => setLocation(e.target.value)}
             placeholder="Location"
@@ -81,6 +83,8 @@ export default function SearchBar({ large = false, placeholder = "Job title, com
       <Search className="w-4 h-4 text-slate-400 flex-shrink-0" />
       <input
         type="text"
+        id="inline-search-input"
+        name="query"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder={placeholder}

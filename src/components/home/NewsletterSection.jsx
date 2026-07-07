@@ -75,13 +75,14 @@ export default function NewsletterSection() {
               <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-stone-400 dark:text-slate-500" />
               <input
                 type="email"
+                id="newsletter-email-input"
+                name="email"
                 required
                 placeholder="Enter your email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={loading || status === "success"}
                 className="w-full pl-11 pr-4 py-3.5 bg-stone-50 dark:bg-stone-950 text-stone-900 dark:text-white border border-stone-200 dark:border-slate-800 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all duration-200 disabled:opacity-60"
-                id="newsletter-email-input"
               />
             </div>
             

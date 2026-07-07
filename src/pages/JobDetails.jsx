@@ -12,6 +12,7 @@ import { formatDate, formatDistanceToNow, isWithinHours, getExpiryInfo } from ".
 import CompanyLogo from "../components/common/CompanyLogo";
 import AdSlot from "../components/common/AdSlot";
 import SearchBar from "../components/common/SearchBar";
+import JobShareFloat from "../components/jobs/JobShareFloat";
 
 export default function JobDetails() {
   const { id } = useParams();
@@ -499,6 +500,9 @@ export default function JobDetails() {
           </div>
         </div>
       )}
+
+      {/* Floating Share Button */}
+      <JobShareFloat job={job} />
     </main>
   );
 }

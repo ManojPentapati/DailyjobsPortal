@@ -1,4 +1,4 @@
-const CACHE_NAME = "dailyjobs-v12";
+const CACHE_NAME = "dailyjobs-v13";
 const STATIC_ASSETS = ["/", "/favicon.svg"];
 
 // Install: cache essential assets
@@ -21,6 +21,8 @@ self.addEventListener("activate", (e) => {
 
 // Fetch: network-first strategy (always try network, fallback to cache)
 self.addEventListener("fetch", (e) => {
+  // Only intercept requests for our own origin
+  if (!e.request.url.startsWith(self.location.origin)) return;
   // Skip non-GET, API and Supabase database requests
   if (e.request.method !== "GET" || e.request.url.includes("/api/") || e.request.url.includes("supabase.co")) return;
 

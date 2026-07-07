@@ -5,21 +5,21 @@ export function resolveLogo(logo) {
   
   if (cleaned.includes("logo.clearbit.com/")) {
     const domain = cleaned.split("logo.clearbit.com/")[1].replace(/^(https?:)?\/\//, "");
-    return `https://icons.duckduckgo.com/ip3/${domain}.ico`;
+    return `https://www.google.com/s2/favicons?sz=64&domain=${domain}`;
   }
   
   if (cleaned.startsWith("http://") || cleaned.startsWith("https://") || cleaned.startsWith("data:")) {
     if (cleaned.includes("favicons?sz=64&domain=")) {
       const parts = cleaned.split("favicons?sz=64&domain=");
       const domainPart = parts[1].split("&")[0].replace(/^(https?:)?\/\//, "");
-      return `https://icons.duckduckgo.com/ip3/${domainPart}.ico`;
+      return `https://www.google.com/s2/favicons?sz=64&domain=${domainPart}`;
     }
     return cleaned;
   }
   
   if (cleaned.includes(".")) {
     const domain = cleaned.replace(/^(https?:)?\/\//, "");
-    return `https://icons.duckduckgo.com/ip3/${domain}.ico`;
+    return `https://www.google.com/s2/favicons?sz=64&domain=${domain}`;
   }
   return cleaned;
 }

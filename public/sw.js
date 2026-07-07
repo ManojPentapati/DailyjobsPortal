@@ -1,4 +1,4 @@
-const CACHE_NAME = "dailyjobs-v9";
+const CACHE_NAME = "dailyjobs-v10";
 const STATIC_ASSETS = ["/", "/favicon.svg"];
 
 // Install: cache essential assets
@@ -34,6 +34,14 @@ self.addEventListener("fetch", (e) => {
         }
         return res;
       })
-      .catch(() => caches.match(e.request))
+      .catch(async () => {
+        const cached = await caches.match(e.request);
+        if (cached) return cached;
+        if (e.request.mode === "navigate") {
+          const rootCache = await caches.match("/");
+          if (rootCache) return rootCache;
+        }
+        return new Response("Offline/Network Error", { status: 503, statusText: "Service Unavailable" });
+      })
   );
 });

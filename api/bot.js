@@ -105,7 +105,7 @@ const fetchLogoUrl = async (companyName) => {
   }
 
   const cleanDomain = domain.replace(/^(https?:)?\/\//, "").trim();
-  return `https://icons.duckduckgo.com/ip3/${cleanDomain}.ico`;
+  return `https://www.google.com/s2/favicons?sz=64&domain=${cleanDomain}`;
 };
 
 // Helper: Escape HTML special characters

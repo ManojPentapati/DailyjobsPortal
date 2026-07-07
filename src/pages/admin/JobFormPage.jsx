@@ -143,7 +143,7 @@ export default function JobFormPage({ isEdit = false }) {
         console.error("Autocomplete logo fetch failed:", err);
       }
 
-      return `https://t2.gstatic.com/faviconV2?client=gcom&size=64&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://${domain}`;
+      return `https://www.google.com/s2/favicons?sz=64&domain=${domain}`;
     };
 
 

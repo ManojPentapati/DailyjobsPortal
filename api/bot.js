@@ -113,7 +113,7 @@ const fetchLogoUrl = async (companyName) => {
   }
 
   const cleanDomain = domain.replace(/^(https?:)?\/\//, "").trim();
-  return `https://t2.gstatic.com/faviconV2?client=gcom&size=64&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${encodeURIComponent("https://" + cleanDomain)}`;
+  return `https://www.google.com/s2/favicons?sz=64&domain=${cleanDomain}`;
 };
 
 // Helper: Escape HTML special characters

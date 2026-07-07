@@ -23,9 +23,14 @@ export default function JobListings() {
 
   useEffect(() => {
     const cat = searchParams.get("category");
+    const comp = searchParams.get("company");
     if (cat) {
       dispatch({ type: "CLEAR_FILTERS" }).then(() => {
         dispatch({ type: "SET_FILTER", payload: { key: "category", value: cat, checked: true } });
+      });
+    } else if (comp) {
+      dispatch({ type: "CLEAR_FILTERS" }).then(() => {
+        dispatch({ type: "SET_FILTER", payload: { key: "company", value: comp, checked: true } });
       });
     }
   }, [searchParams]);

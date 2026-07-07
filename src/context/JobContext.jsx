@@ -28,6 +28,39 @@ export function JobProvider({ children }) {
   const [allActiveCount, setAllActiveCount] = useState(0);
   const [uniqueCompaniesCount, setUniqueCompaniesCount] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [savedJobs, setSavedJobs] = useState([]);
+
+  // Initialize saved jobs from localStorage
+  useEffect(() => {
+    try {
+      const ids = JSON.parse(localStorage.getItem("savedJobs") || "[]");
+      setSavedJobs(ids);
+    } catch {
+      setSavedJobs([]);
+    }
+  }, []);
+
+  const toggleSaveJob = useCallback((id) => {
+    setSavedJobs((prev) => {
+      const isSaved = prev.includes(id);
+      const updated = isSaved ? prev.filter((i) => i !== id) : [...prev, id];
+      try {
+        localStorage.setItem("savedJobs", JSON.stringify(updated));
+      } catch (e) {
+        console.error("Failed to write savedJobs to localStorage:", e);
+      }
+      return updated;
+    });
+  }, []);
+
+  const clearAllSavedJobs = useCallback(() => {
+    try {
+      localStorage.removeItem("savedJobs");
+    } catch (e) {
+      console.error("Failed to clear savedJobs from localStorage:", e);
+    }
+    setSavedJobs([]);
+  }, []);
 
   // Helper to construct Supabase query based on current filters
   const buildQuery = (isCount = false) => {
@@ -240,6 +273,9 @@ export function JobProvider({ children }) {
         totalJobs,
         allActiveCount,
         uniqueCompaniesCount,
+        savedJobs,
+        toggleSaveJob,
+        clearAllSavedJobs,
       }}
     >
       {children}

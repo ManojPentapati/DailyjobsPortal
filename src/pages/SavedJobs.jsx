@@ -6,26 +6,25 @@ import JobCard from "../components/jobs/JobCard";
 import EmptyState from "../components/common/EmptyState";
 
 export default function SavedJobs() {
-  const { getJobById } = useJobs();
+  const { getJobById, savedJobs, clearAllSavedJobs } = useJobs();
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const loadSavedJobs = useCallback(async () => {
     setLoading(true);
     try {
-      const ids = JSON.parse(localStorage.getItem("savedJobs") || "[]");
-      if (ids.length === 0) {
+      if (savedJobs.length === 0) {
         setJobs([]);
         setLoading(false);
         return;
       }
-      const results = await Promise.all(ids.map((id) => getJobById(id)));
+      const results = await Promise.all(savedJobs.map((id) => getJobById(id)));
       setJobs(results.filter(Boolean));
     } catch {
       setJobs([]);
     }
     setLoading(false);
-  }, [getJobById]);
+  }, [getJobById, savedJobs]);
 
   useEffect(() => {
     loadSavedJobs();
@@ -43,7 +42,7 @@ export default function SavedJobs() {
   }, [loadSavedJobs]);
 
   const clearAll = () => {
-    localStorage.removeItem("savedJobs");
+    clearAllSavedJobs();
     setJobs([]);
   };
 

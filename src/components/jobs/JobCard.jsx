@@ -7,20 +7,19 @@ import {
 import { formatDistanceToNow, isWithinHours, getExpiryInfo } from "../utils/dateUtils";
 import CompanyLogo from "../common/CompanyLogo";
 
+import { useJobs } from "../../context/JobContext";
+
 export default function JobCard({ job, compact = false }) {
-  const [saved, setSaved] = useState(() => {
-    try { return JSON.parse(localStorage.getItem("savedJobs") || "[]").includes(job.id); } catch { return false; }
-  });
+  const { savedJobs, toggleSaveJob } = useJobs();
   const navigate = useNavigate();
   const isNew = job.posted_date ? isWithinHours(job.posted_date, 24) : false;
   const expiry = getExpiryInfo(job.expires_at);
 
+  const saved = savedJobs.includes(job.id);
+
   const toggleSave = (e) => {
     e.stopPropagation();
-    const ids = JSON.parse(localStorage.getItem("savedJobs") || "[]");
-    const updated = saved ? ids.filter((i) => i !== job.id) : [...ids, job.id];
-    localStorage.setItem("savedJobs", JSON.stringify(updated));
-    setSaved(!saved);
+    toggleSaveJob(job.id);
   };
 
   const handleShare = (e) => {

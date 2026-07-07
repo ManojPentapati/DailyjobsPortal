@@ -16,8 +16,7 @@ import SearchBar from "../components/common/SearchBar";
 export default function JobDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { getJobById, getSimilarJobs } = useJobs();
-  const [saved, setSaved] = useState(false);
+  const { getJobById, getSimilarJobs, savedJobs, toggleSaveJob } = useJobs();
 
   const [job, setJob] = useState(null);
   const [similar, setSimilar] = useState([]);
@@ -27,6 +26,8 @@ export default function JobDetails() {
   const [showRedirectModal, setShowRedirectModal] = useState(false);
   const [countdown, setCountdown] = useState(3);
   const [redirectInterval, setRedirectInterval] = useState(null);
+
+  const saved = job ? savedJobs.includes(job.id) : false;
 
   useEffect(() => {
     async function fetchJob() {
@@ -41,16 +42,6 @@ export default function JobDetails() {
     }
     fetchJob();
   }, [id, getJobById, getSimilarJobs]);
-
-  // Sync saved state with localStorage when job loads
-  useEffect(() => {
-    if (job) {
-      try {
-        const ids = JSON.parse(localStorage.getItem("savedJobs") || "[]");
-        setSaved(ids.includes(job.id));
-      } catch { /* ignore */ }
-    }
-  }, [job]);
 
   useEffect(() => {
     if (job) {
@@ -296,12 +287,7 @@ export default function JobDetails() {
           {/* Action buttons - full width on mobile */}
           <div className="flex items-center gap-2 mt-4 sm:mt-5">
             <button
-              onClick={() => {
-                const ids = JSON.parse(localStorage.getItem("savedJobs") || "[]");
-                const updated = saved ? ids.filter((i) => i !== job.id) : [...ids, job.id];
-                localStorage.setItem("savedJobs", JSON.stringify(updated));
-                setSaved(!saved);
-              }}
+              onClick={() => toggleSaveJob(job.id)}
               className="p-2.5 rounded-xl bg-stone-200/50 hover:bg-stone-200 dark:bg-white/10 dark:hover:bg-white/20 border border-stone-300 dark:border-white/20 transition-all text-stone-700 dark:text-white"
               aria-label={saved ? "Unsave" : "Save job"}
               id="save-job-detail-btn"

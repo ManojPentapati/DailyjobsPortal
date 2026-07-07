@@ -15,7 +15,7 @@ const navLinks = [
 
 export default function Navbar() {
   const { isDark, toggleTheme } = useTheme();
-  const { dispatch } = useJobs();
+  const { dispatch, savedJobs } = useJobs();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -73,9 +73,14 @@ export default function Navbar() {
             <nav className="hidden lg:flex items-center gap-0.5" aria-label="Main navigation">
               {navLinks.map((link) => (
                 <NavLink key={link.to} to={link.to} end={link.to === "/"}
-                  className={({ isActive }) => isActive ? "nav-link-active" : "nav-link"}
+                  className={({ isActive }) => isActive ? "nav-link-active flex items-center gap-1.5" : "nav-link flex items-center gap-1.5"}
                   id={`nav-${link.label.toLowerCase().replace(/\s/g, "-")}`}>
-                  {link.label}
+                  <span>{link.label}</span>
+                  {link.label === "Saved" && savedJobs.length > 0 && (
+                    <span className="flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-amber-500 text-white text-[10px] font-bold tracking-tight shadow-sm scale-90 transition-all animate-bounce-subtle">
+                      {savedJobs.length}
+                    </span>
+                  )}
                 </NavLink>
               ))}
             </nav>
@@ -128,8 +133,15 @@ export default function Navbar() {
               <div className="flex flex-col gap-0.5">
                 {navLinks.map((link) => (
                   <NavLink key={link.to} to={link.to} end={link.to === "/"}
-                    className={({ isActive }) => isActive ? "nav-link-active block" : "nav-link block"}
-                    onClick={() => setMenuOpen(false)}>{link.label}</NavLink>
+                    className={({ isActive }) => isActive ? "nav-link-active flex items-center justify-between" : "nav-link flex items-center justify-between"}
+                    onClick={() => setMenuOpen(false)}>
+                    <span>{link.label}</span>
+                    {link.label === "Saved" && savedJobs.length > 0 && (
+                      <span className="flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-amber-500 text-white text-[10px] font-bold shadow-sm">
+                        {savedJobs.length}
+                      </span>
+                    )}
+                  </NavLink>
                 ))}
 
               </div>

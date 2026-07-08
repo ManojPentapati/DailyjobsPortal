@@ -124,7 +124,7 @@ export default function JobFormPage({ isEdit = false }) {
       };
 
       const normalized = companyName.toLowerCase().trim().replace(/[^a-z0-9]/g, "");
-      let domain = companyDomains[normalized] || `${companyName.toLowerCase().trim().replace(/\s+/g, "")}.com`;
+      let domain = companyDomains[normalized] || `${companyName.toLowerCase().trim().replace(/[^a-z0-9.]/g, "")}.com`;
 
       try {
         const res = await fetch(`https://autocomplete.clearbit.com/v1/companies/suggest?query=${encodeURIComponent(companyName)}`);

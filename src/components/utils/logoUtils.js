@@ -1,7 +1,11 @@
 // Utility: resolves logo strings to valid absolute URLs
-export function resolveLogo(logo) {
-  if (!logo || !logo.trim()) return null;
-  const cleaned = logo.trim();
+// Returns null for obviously-bad domains so CompanyLogo renders a letter avatar instead.
+
+const INVALID_DOMAIN_CHARS = /[()[\]{}<>!@#$%^&*+=|\\;:'"`,~\s]/;
+
+function extractDomain(raw) {
+  if (!raw || !raw.trim()) return null;
+  const cleaned = raw.trim();
 
   let domain = "";
 
@@ -25,9 +29,19 @@ export function resolveLogo(logo) {
   domain = domain.trim().toLowerCase();
   domain = domain.replace(/\.ico$/, "").replace(/\.com\.com$/, ".com");
 
-  if (domain && domain.includes(".") && domain.length > 3) {
-    return `https://www.google.com/s2/favicons?sz=64&domain=${domain}`;
-  }
-  return null; // Triggers dynamic letter fallback in UI
+  return domain;
 }
 
+export function resolveLogo(logo) {
+  if (!logo || !logo.trim()) return null;
+
+  const domain = extractDomain(logo);
+
+  // Bail out for obviously-broken domains (e.g. "cisf).com", "eyglobaldeliveryservices(gds).com")
+  if (!domain || !domain.includes(".") || domain.length <= 3 || INVALID_DOMAIN_CHARS.test(domain)) {
+    return null; // Triggers dynamic letter fallback in UI
+  }
+
+  // Use the canonical Google favicons endpoint (most reliable, supports sz parameter)
+  return `https://www.google.com/s2/favicons?sz=64&domain=${domain}`;
+}

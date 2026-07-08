@@ -1,4 +1,4 @@
-const CACHE_NAME = "dailyjobs-v20";
+const CACHE_NAME = "dailyjobs-v21";
 const STATIC_ASSETS = ["/", "/favicon.svg"];
 
 // Install: cache essential assets
@@ -19,28 +19,32 @@ self.addEventListener("activate", (e) => {
   self.clients.claim();
 });
 
-// Fetch: network-first for static assets only
+// Fetch: only cache static assets (JS, CSS, fonts, images)
+// Do NOT intercept navigation, API, or unknown requests.
 self.addEventListener("fetch", (e) => {
+  if (e.request.method !== "GET") return;
+
   const url = new URL(e.request.url);
 
-  // Only handle same-origin GET requests
-  if (e.request.method !== "GET") return;
+  // Only handle same-origin requests
   if (url.origin !== self.location.origin) return;
 
-  // Skip API routes and Supabase calls entirely
+  // Never intercept navigation requests — let Vercel handle SPA routing natively
+  if (e.request.mode === "navigate") return;
+
+  // Never intercept API or supabase calls
   if (url.pathname.startsWith("/api/") || e.request.url.includes("supabase.co")) return;
 
-  // For navigation requests (HTML pages), always go to network and fall back to cached root (SPA)
-  if (e.request.mode === "navigate") {
-    e.respondWith(
-      fetch(e.request).catch(() =>
-        caches.match("/").then((root) => root || fetch(e.request))
-      )
-    );
-    return;
-  }
+  // Only cache actual static assets (hashed filenames from Vite, or known static files)
+  const isStaticAsset =
+    url.pathname.startsWith("/assets/") ||
+    url.pathname === "/favicon.svg" ||
+    url.pathname === "/sw.js" ||
+    url.pathname === "/manifest.json";
 
-  // For static assets (JS, CSS, images), use network-first with cache fallback
+  if (!isStaticAsset) return;
+
+  // Network-first with cache fallback for static assets
   e.respondWith(
     fetch(e.request)
       .then((res) => {
@@ -50,8 +54,6 @@ self.addEventListener("fetch", (e) => {
         }
         return res;
       })
-      .catch(() =>
-        caches.match(e.request).then((cached) => cached || new Response("", { status: 408 }))
-      )
+      .catch(() => caches.match(e.request))
   );
 });

@@ -3,6 +3,7 @@ import Navbar from "./components/common/Navbar";
 import Footer from "./components/common/Footer";
 import WhatsAppFloat from "./components/common/WhatsAppFloat";
 import PWAInstallPrompt from "./components/common/PWAInstallPrompt";
+import GoogleAnalytics from "./components/common/GoogleAnalytics";
 import Home from "./pages/Home";
 import JobListings from "./pages/JobListings";
 import JobDetails from "./pages/JobDetails";
@@ -42,26 +43,29 @@ function ProtectedRoute({ children }) {
 
 export default function App() {
   return (
-    <Routes>
-      {/* Public routes */}
-      <Route path="/" element={<PublicLayout><Home /></PublicLayout>} />
-      <Route path="/jobs" element={<PublicLayout><JobListings /></PublicLayout>} />
-      <Route path="/jobs/:id" element={<PublicLayout><JobDetails /></PublicLayout>} />
-      <Route path="/categories" element={<PublicLayout><Categories /></PublicLayout>} />
-      <Route path="/contact" element={<PublicLayout><Contact /></PublicLayout>} />
-      <Route path="/privacy" element={<PublicLayout><PrivacyPolicy /></PublicLayout>} />
-      <Route path="/terms" element={<PublicLayout><TermsConditions /></PublicLayout>} />
-      <Route path="/saved-jobs" element={<PublicLayout><SavedJobs /></PublicLayout>} />
-      <Route path="/about" element={<PublicLayout><About /></PublicLayout>} />
+    <>
+      <GoogleAnalytics />
+      <Routes>
+        {/* Public routes */}
+        <Route path="/" element={<PublicLayout><Home /></PublicLayout>} />
+        <Route path="/jobs" element={<PublicLayout><JobListings /></PublicLayout>} />
+        <Route path="/jobs/:id" element={<PublicLayout><JobDetails /></PublicLayout>} />
+        <Route path="/categories" element={<PublicLayout><Categories /></PublicLayout>} />
+        <Route path="/contact" element={<PublicLayout><Contact /></PublicLayout>} />
+        <Route path="/privacy" element={<PublicLayout><PrivacyPolicy /></PublicLayout>} />
+        <Route path="/terms" element={<PublicLayout><TermsConditions /></PublicLayout>} />
+        <Route path="/saved-jobs" element={<PublicLayout><SavedJobs /></PublicLayout>} />
+        <Route path="/about" element={<PublicLayout><About /></PublicLayout>} />
 
-      {/* Admin routes */}
-      <Route path="/admin/login" element={<AdminLogin />} />
-      <Route path="/admin/dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
-      <Route path="/admin/add-job" element={<ProtectedRoute><JobFormPage isEdit={false} /></ProtectedRoute>} />
-      <Route path="/admin/edit-job/:id" element={<ProtectedRoute><JobFormPage isEdit={true} /></ProtectedRoute>} />
+        {/* Admin routes */}
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin/dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+        <Route path="/admin/add-job" element={<ProtectedRoute><JobFormPage isEdit={false} /></ProtectedRoute>} />
+        <Route path="/admin/edit-job/:id" element={<ProtectedRoute><JobFormPage isEdit={true} /></ProtectedRoute>} />
 
-      {/* Fallback */}
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+        {/* Fallback */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </>
   );
 }

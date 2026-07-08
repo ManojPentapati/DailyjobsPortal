@@ -1,12 +1,41 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Mail, Sparkles, CheckCircle, Bell } from "lucide-react";
 import { supabase } from "../../lib/supabase";
+
+const ALERT_CATEGORIES = [
+  "Software Development",
+  "Design & UI/UX",
+  "Data & Analytics",
+  "Product Management",
+  "Marketing & Sales",
+  "Finance & HR"
+];
 
 export default function NewsletterSection() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState(null); // 'success', 'error', 'duplicate'
   const [message, setMessage] = useState("");
+  const [showCustomizer, setShowCustomizer] = useState(false);
+  const [selectedCats, setSelectedCats] = useState([]);
+
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem("jobAlertsPreferences") || "{}");
+      if (saved && saved.categories) {
+        setSelectedCats(saved.categories);
+        setShowCustomizer(true);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }, []);
+
+  const handleCatToggle = (cat, checked) => {
+    setSelectedCats((prev) =>
+      checked ? [...prev, cat] : prev.filter((c) => c !== cat)
+    );
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -25,13 +54,22 @@ export default function NewsletterSection() {
         // PostgREST Unique constraint violation code is 23505
         if (error.code === "23505") {
           setStatus("duplicate");
-          setMessage("You're already on the list! We'll keep sending you job alerts. ✨");
+          setMessage("You're already on the list! We've updated your alert preferences. ✨");
+          // Save updated preferences even on duplicate
+          localStorage.setItem(
+            "jobAlertsPreferences",
+            JSON.stringify({ email: email.trim().toLowerCase(), categories: selectedCats })
+          );
         } else {
           throw error;
         }
       } else {
         setStatus("success");
         setMessage("Awesome! You've successfully subscribed to daily tech job alerts. 🚀");
+        localStorage.setItem(
+          "jobAlertsPreferences",
+          JSON.stringify({ email: email.trim().toLowerCase(), categories: selectedCats })
+        );
         setEmail("");
       }
     } catch (err) {
@@ -89,7 +127,7 @@ export default function NewsletterSection() {
             <button
               type="submit"
               disabled={loading || status === "success"}
-              className="px-6 py-3.5 rounded-2xl text-sm font-semibold text-white bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-md hover:shadow-lg hover:-translate-y-0.5 disabled:opacity-60 disabled:transform-none transition-all duration-200 flex items-center justify-center gap-2"
+              className="px-6 py-3.5 rounded-2xl text-sm font-semibold text-white bg-gradient-to-r from-amber-50 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-md hover:shadow-lg hover:-translate-y-0.5 disabled:opacity-60 disabled:transform-none transition-all duration-200 flex items-center justify-center gap-2"
               id="newsletter-submit-btn"
             >
               {loading ? (
@@ -102,6 +140,39 @@ export default function NewsletterSection() {
               )}
             </button>
           </form>
+
+          {/* Preferences customizer */}
+          <div className="mt-4 max-w-md mx-auto text-left">
+            <button
+              type="button"
+              onClick={() => setShowCustomizer(!showCustomizer)}
+              className="text-xs font-semibold text-amber-500 hover:text-amber-600 transition-colors flex items-center gap-1 mx-auto sm:mx-0"
+              id="newsletter-customizer-toggle"
+            >
+              ⚙️ Customize alert categories (optional)
+            </button>
+            
+            {showCustomizer && (
+              <div className="mt-4 p-5 rounded-2xl bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-slate-800 animate-slide-down">
+                <p className="text-xs font-bold text-stone-700 dark:text-slate-350 mb-3 uppercase tracking-wider">Select Preferred Categories:</p>
+                <div className="grid grid-cols-2 gap-2.5">
+                  {ALERT_CATEGORIES.map((cat) => (
+                    <label key={cat} className="flex items-center gap-2 cursor-pointer group">
+                      <input
+                        type="checkbox"
+                        checked={selectedCats.includes(cat)}
+                        onChange={(e) => handleCatToggle(cat, e.target.checked)}
+                        className="w-3.5 h-3.5 rounded border-slate-300 dark:border-slate-700 text-amber-500 focus:ring-amber-500"
+                      />
+                      <span className="text-xs text-stone-600 dark:text-slate-400 group-hover:text-stone-900 dark:group-hover:text-slate-200 transition-colors">
+                        {cat}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* Status Message */}
           {status && (

@@ -1,18 +1,23 @@
 import { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { Bookmark, Trash2, ArrowLeft } from "lucide-react";
+import { Bookmark, Trash2, ArrowLeft, Sparkles } from "lucide-react";
 import { useJobs } from "../context/JobContext";
 import JobCard from "../components/jobs/JobCard";
 import EmptyState from "../components/common/EmptyState";
 
 export default function SavedJobs() {
-  const { getJobById, savedJobs, clearAllSavedJobs } = useJobs();
+  const { getJobById, savedJobs, clearAllSavedJobs, getRecommendedJobs } = useJobs();
   const [jobs, setJobs] = useState([]);
+  const [recommended, setRecommended] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const loadSavedJobs = useCallback(async () => {
     setLoading(true);
     try {
+      // Load recommendations
+      const rec = await getRecommendedJobs(3);
+      setRecommended(rec);
+
       if (savedJobs.length === 0) {
         setJobs([]);
         setLoading(false);
@@ -24,7 +29,7 @@ export default function SavedJobs() {
       setJobs([]);
     }
     setLoading(false);
-  }, [getJobById, savedJobs]);
+  }, [getJobById, savedJobs, getRecommendedJobs]);
 
   useEffect(() => {
     loadSavedJobs();
@@ -99,6 +104,28 @@ export default function SavedJobs() {
           {jobs.map((job) => (
             <JobCard key={job.id} job={job} />
           ))}
+        </div>
+      )}
+
+      {/* Job Recommendations Section */}
+      {!loading && recommended.length > 0 && (
+        <div className="mt-16 pt-8 border-t border-slate-100 dark:border-slate-800" id="recommended-jobs-section">
+          <div className="flex items-center gap-2 mb-6">
+            <div className="w-7 h-7 rounded-lg bg-amber-500/10 dark:bg-amber-500/20 flex items-center justify-center">
+              <Sparkles className="w-4 h-4 text-amber-500" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-slate-900 dark:text-white">Recommended for You</h2>
+              <p className="text-xs text-slate-400">
+                {jobs.length > 0 ? "Based on your bookmarked industries" : "Trending job openings right now"}
+              </p>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {recommended.map((job) => (
+              <JobCard key={job.id} job={job} />
+            ))}
+          </div>
         </div>
       )}
     </main>

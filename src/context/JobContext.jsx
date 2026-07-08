@@ -258,6 +258,89 @@ export function JobProvider({ children }) {
     return data;
   };
 
+  const getRecommendedJobs = async (limit = 3) => {
+    let prefCategories = [];
+    try {
+      const prefs = JSON.parse(localStorage.getItem("jobAlertsPreferences") || "{}");
+      if (prefs && prefs.categories) prefCategories = prefs.categories;
+    } catch (e) {
+      console.error(e);
+    }
+
+    if (!savedJobs || savedJobs.length === 0) {
+      if (prefCategories.length > 0) {
+        const { data, error } = await supabase
+          .from("jobs")
+          .select("*")
+          .in("category", prefCategories)
+          .eq("is_active", true)
+          .gt("expires_at", new Date().toISOString())
+          .order("posted_date", { ascending: false })
+          .limit(limit);
+        if (!error && data && data.length > 0) return data;
+      }
+
+      const { data, error } = await supabase
+        .from("jobs")
+        .select("*")
+        .eq("is_active", true)
+        .gt("expires_at", new Date().toISOString())
+        .order("posted_date", { ascending: false })
+        .limit(limit);
+      if (error) {
+        console.error("Error fetching recommended jobs:", error);
+        return [];
+      }
+      return data;
+    }
+
+    try {
+      const { data: savedJobsData } = await supabase
+        .from("jobs")
+        .select("category")
+        .in("id", savedJobs);
+
+      const categories = [...new Set([
+        ...(savedJobsData?.map((j) => j.category) || []),
+        ...prefCategories
+      ].filter(Boolean))];
+
+      if (categories.length === 0) {
+        const { data } = await supabase
+          .from("jobs")
+          .select("*")
+          .eq("is_active", true)
+          .gt("expires_at", new Date().toISOString())
+          .order("posted_date", { ascending: false })
+          .limit(limit);
+        return data || [];
+      }
+
+      const { data, error } = await supabase
+        .from("jobs")
+        .select("*")
+        .in("category", categories)
+        .not("id", "in", `(${savedJobs.join(",")})`)
+        .eq("is_active", true)
+        .gt("expires_at", new Date().toISOString())
+        .order("posted_date", { ascending: false })
+        .limit(limit);
+
+      if (error) throw error;
+      return data;
+    } catch (err) {
+      console.error("Error in getRecommendedJobs:", err);
+      const { data } = await supabase
+        .from("jobs")
+        .select("*")
+        .eq("is_active", true)
+        .gt("expires_at", new Date().toISOString())
+        .order("posted_date", { ascending: false })
+        .limit(limit);
+      return data || [];
+    }
+  };
+
   return (
     <JobContext.Provider
       value={{
@@ -268,6 +351,7 @@ export function JobProvider({ children }) {
         totalPages,
         getJobById,
         getSimilarJobs,
+        getRecommendedJobs,
         adminJobs,
         loading,
         totalJobs,

@@ -111,6 +111,7 @@ export default function NewsletterSignup() {
                 value={email}
                 onChange={(e) => { setEmail(e.target.value); setStatus("idle"); }}
                 placeholder="Enter your email..."
+                autoComplete="email"
                 className="flex-1 px-4 py-2.5 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 text-white placeholder-white/60 text-sm focus:outline-none focus:ring-2 focus:ring-white/50 transition-all"
                 required
               />

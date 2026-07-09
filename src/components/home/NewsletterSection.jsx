@@ -116,6 +116,7 @@ export default function NewsletterSection() {
                 id="newsletter-email-input"
                 name="email"
                 required
+                autoComplete="email"
                 placeholder="Enter your email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}

@@ -1,5 +1,5 @@
-// Utility: resolves logo strings to valid absolute URLs
-// Returns null for obviously-bad domains so CompanyLogo renders a letter avatar instead.
+// Utility: resolves logo strings to valid absolute URLs.
+// Uses our own /api/favicon proxy which NEVER returns 404.
 
 const INVALID_DOMAIN_CHARS = /[()[\]{}<>!@#$%^&*+=|\\;:'"`,~\s]/;
 
@@ -37,11 +37,12 @@ export function resolveLogo(logo) {
 
   const domain = extractDomain(logo);
 
-  // Bail out for obviously-broken domains (e.g. "cisf).com", "eyglobaldeliveryservices(gds).com")
+  // Bail out for obviously-broken domains
   if (!domain || !domain.includes(".") || domain.length <= 3 || INVALID_DOMAIN_CHARS.test(domain)) {
-    return null; // Triggers dynamic letter fallback in UI
+    return null; // Letter avatar fallback
   }
 
-  // Use the canonical Google favicons endpoint (most reliable, supports sz parameter)
-  return `https://www.google.com/s2/favicons?sz=64&domain=${domain}`;
+  // Route through our own proxy — it NEVER returns 404,
+  // so <img> tags won't log "Failed to load resource" errors.
+  return `/api/favicon?domain=${encodeURIComponent(domain)}`;
 }

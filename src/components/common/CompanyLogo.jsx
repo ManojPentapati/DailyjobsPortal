@@ -1,10 +1,6 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Building2 } from "lucide-react";
 import { resolveLogo } from "../utils/logoUtils";
-
-// In-memory cache shared across all CompanyLogo instances for the page session.
-// Stores domain → "ok" | "fail" to avoid re-fetching the same favicon URL.
-const validatedCache = new Map();
 
 function LetterAvatar({ company, className }) {
   const firstLetter = company ? company.trim().charAt(0).toUpperCase() : "";
@@ -30,51 +26,14 @@ function LetterAvatar({ company, className }) {
 }
 
 export default function CompanyLogo({ logo, company, className = "w-12 h-12" }) {
-  // "pending" = checking URL, "ok" = image is valid, "fail" = show letter avatar
-  const [status, setStatus] = useState("pending");
+  const [showImg, setShowImg] = useState(true);
   const resolved = resolveLogo(logo);
-  const mountedRef = useRef(true);
 
   useEffect(() => {
-    mountedRef.current = true;
-    return () => { mountedRef.current = false; };
-  }, []);
+    setShowImg(true);
+  }, [logo]);
 
-  useEffect(() => {
-    if (!resolved) {
-      setStatus("fail");
-      return;
-    }
-
-    // Check the in-memory cache first
-    const cached = validatedCache.get(resolved);
-    if (cached) {
-      setStatus(cached);
-      return;
-    }
-
-    // Pre-validate with fetch() — a fetch 404 does NOT log to the browser console,
-    // whereas an <img> 404 always does.
-    setStatus("pending");
-    fetch(resolved, { mode: "no-cors", cache: "force-cache" })
-      .then((res) => {
-        // With no-cors, response is opaque (status 0) but if we get a response at all, the resource exists.
-        // For same-origin or CORS-allowed, we can check res.ok directly.
-        if (res.type === "opaque" || res.ok) {
-          validatedCache.set(resolved, "ok");
-          if (mountedRef.current) setStatus("ok");
-        } else {
-          validatedCache.set(resolved, "fail");
-          if (mountedRef.current) setStatus("fail");
-        }
-      })
-      .catch(() => {
-        validatedCache.set(resolved, "fail");
-        if (mountedRef.current) setStatus("fail");
-      });
-  }, [resolved]);
-
-  if (status !== "ok" || !resolved) {
+  if (!resolved || !showImg) {
     return <LetterAvatar company={company} className={className} />;
   }
 
@@ -83,10 +42,13 @@ export default function CompanyLogo({ logo, company, className = "w-12 h-12" }) 
       src={resolved}
       alt={company}
       className={`${className} object-contain p-1 bg-white rounded-lg border border-slate-100 dark:border-slate-800 shrink-0`}
-      onError={() => {
-        validatedCache.set(resolved, "fail");
-        setStatus("fail");
+      onLoad={(e) => {
+        // If the image is 1x1 (our transparent fallback pixel), show letter avatar instead
+        if (e.target.naturalWidth <= 1 || e.target.naturalHeight <= 1) {
+          setShowImg(false);
+        }
       }}
+      onError={() => setShowImg(false)}
     />
   );
 }

@@ -5,8 +5,9 @@ import AdminSidebar from "../../components/admin/AdminSidebar";
 import { useJobs } from "../../context/JobContext";
 import { categories } from "../../data/jobs";
 import { generateSlug } from "../../components/utils/slugUtils";
+import { parseWalkinData, cleanDescription, serializeWalkinData } from "../../components/utils/walkinUtils";
 
-const JOB_TYPES = ["Full-time", "Part-time", "Contract", "Internship", "Freelance"];
+const JOB_TYPES = ["Full-time", "Part-time", "Contract", "Internship", "Freelance", "Walk-in"];
 const QUALIFICATIONS = ["B.Tech", "M.Tech", "BCA", "MCA", "B.Sc", "M.Sc", "B.Com", "BBA", "MBA", "Any Degree"];
 const PASSOUT_YEARS = ["2022", "2023", "2024", "2025", "2026", "2027", "2028"];
 
@@ -29,6 +30,8 @@ const emptyJob = {
   qualification: "B.Tech",
   passout_year: "",
   job_type: "Full-time",
+  walkin_venue: "",
+  walkin_datetime: "",
 };
 
 export default function JobFormPage({ isEdit = false }) {
@@ -43,14 +46,21 @@ export default function JobFormPage({ isEdit = false }) {
     document.title = isEdit ? "Edit Job – Admin" : "Add New Job – Admin";
     if (isEdit && id) {
       getJobById(id).then(job => {
-        if (job) setForm({
-          ...emptyJob,
-          ...job,
-          skills: job.skills?.join(", ") || "",
-          qualification: job.qualification || "B.Tech",
-          passout_year: job.passout_year || "",
-          job_type: job.job_type || "Full-time",
-        });
+        if (job) {
+          const walkin = parseWalkinData(job.description);
+          const cleanDesc = cleanDescription(job.description);
+          setForm({
+            ...emptyJob,
+            ...job,
+            description: cleanDesc,
+            skills: job.skills?.join(", ") || "",
+            qualification: job.qualification || "B.Tech",
+            passout_year: job.passout_year || "",
+            job_type: job.job_type || "Full-time",
+            walkin_venue: walkin?.venue || "",
+            walkin_datetime: walkin?.dateTime || "",
+          });
+        }
       });
     }
   }, [isEdit, id]);
@@ -67,6 +77,10 @@ export default function JobFormPage({ isEdit = false }) {
       errs.apply_link = "Apply link is required.";
     } else if (!/^https?:\/\/.+/.test(form.apply_link)) {
       errs.apply_link = "Must be a valid URL starting with http:// or https://";
+    }
+    if (form.job_type === "Walk-in") {
+      if (!form.walkin_datetime?.trim()) errs.walkin_datetime = "Walk-in Date & Time is required.";
+      if (!form.walkin_venue?.trim()) errs.walkin_venue = "Walk-in Venue is required.";
     }
     setErrors(errs);
     return Object.keys(errs).length === 0;
@@ -149,9 +163,19 @@ export default function JobFormPage({ isEdit = false }) {
 
     const logoUrl = await fetchLogoUrl(form.company);
 
-    // Convert comma-separated string back to array
+    let finalDescription = form.description;
+    if (form.job_type === "Walk-in") {
+      finalDescription = serializeWalkinData(form.description, {
+        venue: form.walkin_venue,
+        dateTime: form.walkin_datetime
+      });
+    } else {
+      finalDescription = cleanDescription(form.description);
+    }
+
     const jobData = { 
       ...form, 
+      description: finalDescription,
       company_logo: logoUrl,
       skills: form.skills.split(",").map((s) => s.trim()).filter(Boolean) 
     };
@@ -161,6 +185,8 @@ export default function JobFormPage({ isEdit = false }) {
     delete jobData.updated_at;
     delete jobData.posted_date;
     delete jobData.expires_at;
+    delete jobData.walkin_venue;
+    delete jobData.walkin_datetime;
 
     try {
       if (isEdit) {
@@ -259,6 +285,32 @@ export default function JobFormPage({ isEdit = false }) {
                       {JOB_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
                     </select>
                   </FormField>
+                  {form.job_type === "Walk-in" && (
+                    <>
+                      <FormField label="Walk-in Date & Time" id="job-walkin-datetime" error={errors.walkin_datetime} required>
+                        <input
+                          id="job-walkin-datetime"
+                          name="walkin_datetime"
+                          type="text"
+                          value={form.walkin_datetime || ""}
+                          onChange={handleChange}
+                          placeholder="e.g. July 25 - July 27, 10:00 AM - 4:00 PM"
+                          className={`input-field ${errors.walkin_datetime ? "border-red-400" : ""}`}
+                        />
+                      </FormField>
+                      <FormField label="Walk-in Venue Address" id="job-walkin-venue" error={errors.walkin_venue} required>
+                        <input
+                          id="job-walkin-venue"
+                          name="walkin_venue"
+                          type="text"
+                          value={form.walkin_venue || ""}
+                          onChange={handleChange}
+                          placeholder="e.g. Tech Park, 4th Floor, Phase 2, Bangalore"
+                          className={`input-field ${errors.walkin_venue ? "border-red-400" : ""}`}
+                        />
+                      </FormField>
+                    </>
+                  )}
                   <FormField label="Experience Required" id="job-experience" error={errors.experience} required>
                     <input id="job-experience" name="experience" type="text" value={form.experience} onChange={handleChange}
                       placeholder="e.g. 3-5 years" className={`input-field ${errors.experience ? "border-red-400" : ""}`} />

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
 import { Briefcase, Search, Menu, X } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
 import { useJobs } from "../../context/JobContext";
@@ -7,6 +7,7 @@ import { useJobs } from "../../context/JobContext";
 const navLinks = [
   { to: "/", label: "Home" },
   { to: "/jobs", label: "Find Jobs" },
+  { to: "/jobs?type=Walk-in", label: "Walk-ins" },
   { to: "/categories", label: "Categories" },
   { to: "/saved-jobs", label: "Saved" },
   { to: "/about", label: "About" },
@@ -17,6 +18,7 @@ export default function Navbar() {
   const { isDark, toggleTheme } = useTheme();
   const { dispatch, savedJobs } = useJobs();
   const navigate = useNavigate();
+  const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -71,18 +73,31 @@ export default function Navbar() {
 
             {/* Desktop Nav */}
             <nav className="hidden lg:flex items-center gap-0.5" aria-label="Main navigation">
-              {navLinks.map((link) => (
-                <NavLink key={link.to} to={link.to} end={link.to === "/"}
-                  className={({ isActive }) => isActive ? "nav-link-active flex items-center gap-1.5" : "nav-link flex items-center gap-1.5"}
-                  id={`nav-${link.label.toLowerCase().replace(/\s/g, "-")}`}>
-                  <span>{link.label}</span>
-                  {link.label === "Saved" && savedJobs.length > 0 && (
-                    <span className="flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-amber-500 text-white text-[10px] font-bold tracking-tight shadow-sm scale-90 transition-all animate-bounce-subtle">
-                      {savedJobs.length}
-                    </span>
-                  )}
-                </NavLink>
-              ))}
+              {navLinks.map((link) => {
+                const isActive = link.to === "/"
+                  ? location.pathname === "/"
+                  : link.to.includes("type=Walk-in")
+                    ? location.pathname === "/jobs" && location.search.includes("type=Walk-in")
+                    : link.to === "/jobs"
+                      ? location.pathname === "/jobs" && !location.search.includes("type=Walk-in")
+                      : location.pathname === link.to;
+
+                return (
+                  <Link
+                    key={link.to}
+                    to={link.to}
+                    className={isActive ? "nav-link-active flex items-center gap-1.5 text-sm font-medium transition-colors" : "nav-link flex items-center gap-1.5 text-sm font-medium transition-colors"}
+                    id={`nav-${link.label.toLowerCase().replace(/\s/g, "-")}`}
+                  >
+                    <span>{link.label}</span>
+                    {link.label === "Saved" && savedJobs.length > 0 && (
+                      <span className="flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-amber-500 text-white text-[10px] font-bold tracking-tight shadow-sm scale-90 transition-all animate-bounce-subtle">
+                        {savedJobs.length}
+                      </span>
+                    )}
+                  </Link>
+                );
+              })}
             </nav>
 
             {/* Right actions */}
@@ -133,19 +148,31 @@ export default function Navbar() {
           {menuOpen && (
             <nav className="lg:hidden pb-4 border-t border-stone-100 dark:border-white/10 pt-3 animate-slide-up" aria-label="Mobile navigation">
               <div className="flex flex-col gap-0.5">
-                {navLinks.map((link) => (
-                  <NavLink key={link.to} to={link.to} end={link.to === "/"}
-                    className={({ isActive }) => isActive ? "nav-link-active flex items-center justify-between" : "nav-link flex items-center justify-between"}
-                    onClick={() => setMenuOpen(false)}>
-                    <span>{link.label}</span>
-                    {link.label === "Saved" && savedJobs.length > 0 && (
-                      <span className="flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-amber-500 text-white text-[10px] font-bold shadow-sm">
-                        {savedJobs.length}
-                      </span>
-                    )}
-                  </NavLink>
-                ))}
+                {navLinks.map((link) => {
+                  const isActive = link.to === "/"
+                    ? location.pathname === "/"
+                    : link.to.includes("type=Walk-in")
+                      ? location.pathname === "/jobs" && location.search.includes("type=Walk-in")
+                      : link.to === "/jobs"
+                        ? location.pathname === "/jobs" && !location.search.includes("type=Walk-in")
+                        : location.pathname === link.to;
 
+                  return (
+                    <Link
+                      key={link.to}
+                      to={link.to}
+                      className={isActive ? "nav-link-active flex items-center justify-between" : "nav-link flex items-center justify-between"}
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      <span>{link.label}</span>
+                      {link.label === "Saved" && savedJobs.length > 0 && (
+                        <span className="flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-amber-500 text-white text-[10px] font-bold shadow-sm">
+                          {savedJobs.length}
+                        </span>
+                      )}
+                    </Link>
+                  );
+                })}
               </div>
             </nav>
           )}

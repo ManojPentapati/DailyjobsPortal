@@ -91,9 +91,15 @@ export default function JobCard({ job, compact = false }) {
         {applyTimeInfo && <span className={`px-2 py-0.5 rounded-md text-[11px] font-semibold border ${applyTimeInfo.colorClass}`}>⏱️ {applyTimeInfo.label}</span>}
         <span className="badge-type">{job.category || job.type}</span>
         {job.job_type && (
-          <span className="badge-type bg-sky-50 text-sky-700 border border-sky-200 dark:bg-sky-950/40 dark:text-sky-400 dark:border-sky-900/50">
-            {job.job_type}
-          </span>
+          job.job_type === "Walk-in" ? (
+            <span className="badge-type bg-gradient-to-r from-amber-500 to-orange-500 text-white border border-amber-500/20 dark:from-amber-600 dark:to-orange-600 dark:border-amber-600/30 font-bold flex items-center gap-1 shadow-sm">
+              <span>🚶‍♂️</span> Walk-in
+            </span>
+          ) : (
+            <span className="badge-type bg-sky-50 text-sky-700 border border-sky-200 dark:bg-sky-950/40 dark:text-sky-400 dark:border-sky-900/50">
+              {job.job_type}
+            </span>
+          )
         )}
         {job.qualification && (
           <span className="badge-type bg-violet-50 text-violet-700 border border-violet-200 dark:bg-violet-950/40 dark:text-violet-400 dark:border-violet-905/50">

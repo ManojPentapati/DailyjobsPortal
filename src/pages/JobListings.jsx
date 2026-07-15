@@ -24,6 +24,7 @@ export default function JobListings() {
   useEffect(() => {
     const cat = searchParams.get("category");
     const comp = searchParams.get("company");
+    const jobType = searchParams.get("type");
     if (cat) {
       dispatch({ type: "CLEAR_FILTERS" }).then(() => {
         dispatch({ type: "SET_FILTER", payload: { key: "category", value: cat, checked: true } });
@@ -31,6 +32,10 @@ export default function JobListings() {
     } else if (comp) {
       dispatch({ type: "CLEAR_FILTERS" }).then(() => {
         dispatch({ type: "SET_FILTER", payload: { key: "company", value: comp, checked: true } });
+      });
+    } else if (jobType) {
+      dispatch({ type: "CLEAR_FILTERS" }).then(() => {
+        dispatch({ type: "SET_FILTER", payload: { key: "type", value: jobType, checked: true } });
       });
     }
   }, [searchParams]);

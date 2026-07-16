@@ -282,7 +282,15 @@ Note: If the Crawled Pages Context lacks explicit skills or responsibilities, in
 IMPORTANT: Always normalize location to standard city names and experience to standard ranges as specified above. Consistency is critical.
 `;
 
-    const modelsToTry = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash-lite", "gemini-flash-latest"];
+    const modelsToTry = [
+      "gemini-3.1-flash-lite",
+      "gemini-flash-lite-latest",
+      "gemini-2.5-flash",
+      "gemini-2.0-flash",
+      "gemini-2.5-flash-lite",
+      "gemini-2.0-flash-lite",
+      "gemini-flash-latest"
+    ];
     let result = null;
     let geminiError = null;
     const delay = (ms) => new Promise((r) => setTimeout(r, ms));

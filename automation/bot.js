@@ -55,10 +55,20 @@ console.log(`Allowed Users: ${allowedIds.length ? allowedIds.join(", ") : "All U
 
 // Health check server for Render / Railway port binding
 const PORT = process.env.PORT || 8080;
-http.createServer((req, res) => {
+const server = http.createServer((req, res) => {
   res.writeHead(200, { "Content-Type": "text/plain" });
   res.end("Daily Jobs Bot is active.\n");
-}).listen(PORT, () => {
+});
+
+server.on("error", (err) => {
+  if (err.code === "EADDRINUSE") {
+    console.warn(`⚠️ Port ${PORT} already in use. Skipping health check server binding (running bot anyway).`);
+  } else {
+    console.error("HTTP Server Error:", err);
+  }
+});
+
+server.listen(PORT, () => {
   console.log(`📡 Port ${PORT} bound successfully for hosting health checks.`);
 });
 

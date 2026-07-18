@@ -235,18 +235,24 @@ export default async function handler(req, res) {
   try {
     // 1. Crawl all webpages in parallel
     const crawlResults = await Promise.all(urls.map((url) => crawlWebpage(url)));
-    const validCrawls = crawlResults.filter((r) => r.text || r.links.length > 0);
-
-    if (validCrawls.length === 0) {
-      await sendTelegramMessage(chatId, `❌ Failed to crawl any of the links provided: ${urls.join(", ")}`, messageId);
-      return res.status(200).send("Crawl failed.");
-    }
+    
+    // We map crawls to make sure we always pass context, even if the website blocked crawling (e.g. 403 or error).
+    // This allows Gemini to parse job details from the Telegram message text and use the original URL.
+    const validCrawls = crawlResults.map((r) => ({
+      url: r.url,
+      text: r.text || "(This page blocked crawling or is empty. Use the raw Telegram message text below for details)",
+      links: r.links || [],
+      error: r.error || null
+    }));
 
     // 2. Query Gemini with fallback support
+    const todayDateStr = new Date().toLocaleDateString("en-US", { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
     const prompt = `
 You are a job parser AI. Your task is to analyze a raw job post message and the text/links crawled from its linked landing pages.
 The message contains multiple job listings. Your goal is to map each job to its crawled page context and extract the details.
 For each job, locate the REAL official application link (like a Google Form, Workday, Lever, Greenhouse, or the company's official career portal) on its respective crawled landing page.
+
+Today's Date: ${todayDateStr}
 
 Raw Message:
 """
@@ -271,8 +277,8 @@ Respond with a raw JSON array of job objects matching the exact schema below. Do
     "qualification": "Highly concise qualification label (e.g. B.E/B.Tech, MCA, B.Sc, BCA, Any Degree, BBA, MBA, M.Tech). Do NOT write a sentence. Keep it to a clean, simple short label.",
     "passout_year": "Comma separated years (e.g. 2024, 2025, 2026). If open to any, say Any",
     "job_type": "One of: Full-time, Part-time, Contract, Internship, Freelance",
-    "apply_link": "The REAL official apply link found on its corresponding crawled page (e.g. a docs.google.com/forms link or infosys.com career link). Do NOT use the wrapper link. If not found, output the best alternative from the crawled page.",
-    "expires_in_days": "Number of days until the job application link expires, estimated based on any text mentioning deadline, urgency, or expiration (e.g. 3, 5, 7). If no explicit mention of deadline/urgency/expiration, default to 7."
+    "apply_link": "The REAL official apply link found on its corresponding crawled page (e.g. a docs.google.com/forms link or infosys.com career link). Do NOT use the wrapper link. If the crawled page text is blocked or empty, use the corresponding page URL as the apply link.",
+    "expires_in_days": "Number of days from today until the application expires. Calculate this dynamically: if the post/page mentions a specific deadline (e.g. 'Apply by July 25th' and today is July 18th), calculate the exact number of days (7). If it mentions 'Apply ASAP', 'Urgent', or 'Limited seats', set to 3. If there is no deadline mentioned, estimate a realistic expiration: 14 days for startups/smaller companies, 30 days for large MNCs (e.g. Infosys, TCS, Cognizant, Wipro). Do not just output 7 for everything."
   }
 ]
 

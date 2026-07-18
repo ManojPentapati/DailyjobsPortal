@@ -32,7 +32,12 @@ function extractUrls(text) {
   ];
 
   const filtered = matches.filter((url) => {
-    return !ignorePatterns.some((pattern) => url.toLowerCase().includes(pattern));
+    const lowerUrl = url.toLowerCase();
+    // Allow LinkedIn jobs specifically
+    if (lowerUrl.includes("linkedin.com/jobs/")) {
+      return true;
+    }
+    return !ignorePatterns.some((pattern) => lowerUrl.includes(pattern));
   });
 
   return [...new Set(filtered)];

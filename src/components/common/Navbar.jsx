@@ -9,6 +9,7 @@ const navLinks = [
   { to: "/jobs", label: "Find Jobs" },
   { to: "/jobs?type=Walk-in", label: "Walk-ins" },
   { to: "/categories", label: "Categories" },
+  { to: "/blog", label: "Career Advice" },
   { to: "/saved-jobs", label: "Saved" },
   { to: "/about", label: "About" },
   { to: "/contact", label: "Contact" },

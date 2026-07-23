@@ -5,8 +5,10 @@ const quickLinks = [
   { to: "/", label: "Home" },
   { to: "/jobs", label: "Browse Jobs" },
   { to: "/categories", label: "Categories" },
+  { to: "/blog", label: "Career Advice & Blog" },
   { to: "/about", label: "About Us" },
-  { to: "/contact", label: "Contact" },
+  { to: "/contact", label: "Contact Us" },
+  { to: "/disclaimer", label: "Disclaimer" },
   { to: "/privacy", label: "Privacy Policy" },
   { to: "/terms", label: "Terms of Service" },
 ];

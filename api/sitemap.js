@@ -43,14 +43,47 @@ export default async function handler(req, res) {
     xml += `    <priority>0.9</priority>\n`;
     xml += `  </url>\n`;
 
-    // Add static privacy page
+    // Add blog listing page
+    xml += `  <url>\n`;
+    xml += `    <loc>${baseUrl}/blog</loc>\n`;
+    xml += `    <changefreq>weekly</changefreq>\n`;
+    xml += `    <priority>0.8</priority>\n`;
+    xml += `  </url>\n`;
+
+    // Add static career blog articles
+    const blogSlugs = [
+      "off-campus-placement-guide-2026",
+      "ats-friendly-resume-building-tips",
+      "top-tech-skills-in-demand-2026",
+      "freshers-technical-interview-prep"
+    ];
+    blogSlugs.forEach((slug) => {
+      xml += `  <url>\n`;
+      xml += `    <loc>${baseUrl}/blog/${slug}</loc>\n`;
+      xml += `    <changefreq>monthly</changefreq>\n`;
+      xml += `    <priority>0.8</priority>\n`;
+      xml += `  </url>\n`;
+    });
+
+    // Add static pages
+    xml += `  <url>\n`;
+    xml += `    <loc>${baseUrl}/about</loc>\n`;
+    xml += `    <changefreq>monthly</changefreq>\n`;
+    xml += `    <priority>0.5</priority>\n`;
+    xml += `  </url>\n`;
+
+    xml += `  <url>\n`;
+    xml += `    <loc>${baseUrl}/disclaimer</loc>\n`;
+    xml += `    <changefreq>monthly</changefreq>\n`;
+    xml += `    <priority>0.3</priority>\n`;
+    xml += `  </url>\n`;
+
     xml += `  <url>\n`;
     xml += `    <loc>${baseUrl}/privacy</loc>\n`;
     xml += `    <changefreq>monthly</changefreq>\n`;
     xml += `    <priority>0.3</priority>\n`;
     xml += `  </url>\n`;
 
-    // Add static terms page
     xml += `  <url>\n`;
     xml += `    <loc>${baseUrl}/terms</loc>\n`;
     xml += `    <changefreq>monthly</changefreq>\n`;

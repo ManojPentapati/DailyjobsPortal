@@ -134,16 +134,29 @@ export default async function handler(req, res) {
 
     console.log(`[Auto-Scraper] Fetched ${scrapedJobs.length} potential fresher tech job listings across all companies.`);
 
-    // Fetch existing active jobs to perform strict duplicate checking
+// Helper: Fuzzy title key generator
+function getFuzzyKey(company, title) {
+  const normCompany = (company || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+  const normTitle = (title || "")
+    .toLowerCase()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\b(fresher|freshers|trainee|intern|internship|associate|junior|sr|senior)\b/g, "")
+    .split(/\s+/)
+    .filter(Boolean)
+    .sort()
+    .join("");
+  return `${normCompany}-${normTitle}`;
+}
+
+    // Fetch existing active jobs to perform strict fuzzy duplicate checking
     const { data: existingActiveJobs } = await supabase
       .from("jobs")
       .select("id, title, company, apply_link")
       .eq("is_active", true);
 
     const existingKeys = new Set(
-      (existingActiveJobs || []).map((j) =>
-        `${(j.company || "").toLowerCase().trim().replace(/[^a-z0-9]/g, "")}-${(j.title || "").toLowerCase().trim().replace(/[^a-z0-9]/g, "")}`
-      )
+      (existingActiveJobs || []).map((j) => getFuzzyKey(j.company, j.title))
     );
 
     const existingLinks = new Set(
@@ -156,9 +169,7 @@ export default async function handler(req, res) {
     let skippedCount = 0;
 
     for (const job of scrapedJobs) {
-      const cleanCompanyKey = (job.company || "").toLowerCase().trim().replace(/[^a-z0-9]/g, "");
-      const cleanTitleKey = (job.title || "").toLowerCase().trim().replace(/[^a-z0-9]/g, "");
-      const jobKey = `${cleanCompanyKey}-${cleanTitleKey}`;
+      const jobKey = getFuzzyKey(job.company, job.title);
       const cleanJobLink = (job.apply_link || "").toLowerCase().split("?")[0].replace(/\/$/, "");
 
       if (existingKeys.has(jobKey) || (cleanJobLink && existingLinks.has(cleanJobLink))) {

@@ -353,16 +353,29 @@ IMPORTANT: Always normalize location to standard city names and experience to st
       return `${baseSlug}-${randomSuffix}`.substring(0, 100);
     };
 
-    // Fetch existing active jobs to perform strict duplicate checking
+    // Helper: Fuzzy title key generator
+    const getFuzzyKey = (company, title) => {
+      const normCompany = (company || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+      const normTitle = (title || "")
+        .toLowerCase()
+        .replace(/&/g, "and")
+        .replace(/[^a-z0-9\s]/g, " ")
+        .replace(/\b(fresher|freshers|trainee|intern|internship|associate|junior|sr|senior)\b/g, "")
+        .split(/\s+/)
+        .filter(Boolean)
+        .sort()
+        .join("");
+      return `${normCompany}-${normTitle}`;
+    };
+
+    // Fetch existing active jobs to perform strict fuzzy duplicate checking
     const { data: existingActiveJobs } = await supabase
       .from("jobs")
       .select("id, title, company, apply_link")
       .eq("is_active", true);
 
     const existingKeys = new Set(
-      (existingActiveJobs || []).map((j) =>
-        `${(j.company || "").toLowerCase().trim().replace(/[^a-z0-9]/g, "")}-${(j.title || "").toLowerCase().trim().replace(/[^a-z0-9]/g, "")}`
-      )
+      (existingActiveJobs || []).map((j) => getFuzzyKey(j.company, j.title))
     );
 
     const existingLinks = new Set(
@@ -373,9 +386,7 @@ IMPORTANT: Always normalize location to standard city names and experience to st
 
     // Loop through each job and save to Supabase
     for (const jobData of jobsData) {
-      const cleanCompanyKey = (jobData.company || "").toLowerCase().trim().replace(/[^a-z0-9]/g, "");
-      const cleanTitleKey = (jobData.title || "").toLowerCase().trim().replace(/[^a-z0-9]/g, "");
-      const jobKey = `${cleanCompanyKey}-${cleanTitleKey}`;
+      const jobKey = getFuzzyKey(jobData.company, jobData.title);
       const cleanJobLink = (jobData.apply_link || "").toLowerCase().split("?")[0].replace(/\/$/, "");
 
       if (existingKeys.has(jobKey) || (cleanJobLink && existingLinks.has(cleanJobLink))) {

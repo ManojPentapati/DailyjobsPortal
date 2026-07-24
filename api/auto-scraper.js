@@ -162,16 +162,17 @@ export default async function handler(req, res) {
 
     console.log(`[Auto-Scraper] Fetched ${scrapedJobs.length} potential fresher tech job listings across all companies.`);
 
-// Helper: Check if location is suitable for Indian job seekers (India or Worldwide / Remote)
+// Helper: Check if location is suitable for Indian job seekers (India or Remote open to India)
 function isTargetLocation(locationStr) {
   if (!locationStr) return true;
   const loc = locationStr.toLowerCase();
-  const excludedCountries = [
-    "brazil", "uruguay", "mexico", "germany", "france", "spain", "italy",
-    "uk only", "us only", "usa only", "canada only", "australia only", "japan",
-    "netherlands", "poland", "sweden", "finland", "norway"
+  const excludedKeywords = [
+    "usa", "us ", "us,", "us-", "canada", "israel", "europe", "americas",
+    "timezone", "cst", "est", "pst", "jst", "uk ", "uk,", "uk-", "brazil",
+    "mexico", "uruguay", "germany", "france", "spain", "italy", "poland",
+    "sweden", "finland", "norway", "australia", "japan", "singapore only"
   ];
-  return !excludedCountries.some((country) => loc.includes(country));
+  return !excludedKeywords.some((keyword) => loc.includes(keyword));
 }
 
 // Helper: Fuzzy title key generator (strips location parentheticals and filler words)

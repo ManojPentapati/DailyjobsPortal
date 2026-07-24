@@ -262,11 +262,38 @@ function getFuzzyKey(company, title) {
       }
     }
 
-    // Broadcast new jobs to Telegram Channel or Admin Chat
+    // Broadcast new jobs to Telegram Channel & send WhatsApp copy block to Admin
     if (newInsertedJobs.length > 0) {
       const today = new Date().toLocaleDateString("en-US", { day: "numeric", month: "long", year: "numeric" }).toUpperCase();
       const portalUrlBase = "https://dailyjobs-portal.vercel.app";
 
+      // 1. Build WhatsApp version (using * for bold, no HTML tags)
+      let whatsAppPost = `*📝 LATEST TECH JOB OPENINGS | ${today}*\n\n`;
+      newInsertedJobs.forEach((job) => {
+        const jobUrl = `${portalUrlBase}/jobs/${job.slug}`;
+        whatsAppPost += `🌟 *${job.company.toUpperCase()} IS HIRING!* 🌟\n`;
+        whatsAppPost += `━━━━━━━━━━━━━━━━━━━━\n`;
+        whatsAppPost += `  ◈ *Role:* ${job.title}\n`;
+        whatsAppPost += `  ◈ *Location:* ${job.location || "Across India"}\n`;
+        whatsAppPost += `  ◈ *Degree:* ${job.qualification || "Any Graduate"}\n`;
+        whatsAppPost += `  ◈ *Experience:* ${job.experience || "Freshers"}\n`;
+        whatsAppPost += `  ◈ *Batch:* ${job.passout_year || "Any"}\n`;
+        if (job.salary) {
+          whatsAppPost += `  ◈ *Package:* ${job.salary}\n`;
+        }
+        whatsAppPost += `━━━━━━━━━━━━━━━━━━━━\n`;
+        whatsAppPost += `🚀 *Apply Link:* ${jobUrl}\n`;
+        whatsAppPost += `⏰ *Apply ASAP! Link expires in 30 days.*\n\n\n`;
+      });
+      whatsAppPost += `*📢 Share this opportunity with your Friends and WhatsApp Group ❤️*\n\n`;
+      whatsAppPost += `*🌐 Search more tech jobs on our website:* \n`;
+      whatsAppPost += `https://dailyjobs-portal.vercel.app\n\n`;
+      whatsAppPost += `*👉 Join our Telegram Channel for daily updates:* \n`;
+      whatsAppPost += `https://t.me/DailyJobsUpdatesportal\n\n`;
+      whatsAppPost += `*👉 Join our WhatsApp Channel for mobile alerts:* \n`;
+      whatsAppPost += `https://whatsapp.com/channel/0029VbCRYZN0Qeaep5uwNY3f`;
+
+      // 2. Build Telegram Channel version (using <b> for bold)
       let channelPost = `<b>📝 LATEST TECH JOB OPENINGS | ${today}</b>\n\n`;
       newInsertedJobs.forEach((job) => {
         const jobUrl = `${portalUrlBase}/jobs/${job.slug}`;
@@ -284,18 +311,25 @@ function getFuzzyKey(company, title) {
         channelPost += `🚀 <b>Apply Link:</b> ${jobUrl}\n`;
         channelPost += `⏰ <b>Apply ASAP! Link expires in 30 days.</b>\n\n\n`;
       });
-
       channelPost += `<b>📢 Share this opportunity with your Friends and WhatsApp Group ❤️</b>\n\n`;
       channelPost += `<b>🌐 Search more tech jobs on our website:</b>\n`;
       channelPost += `https://dailyjobs-portal.vercel.app\n\n`;
-      channelPost += `<b>👉 Join our Telegram Channel for daily updates:</b>\n`;
-      channelPost += `https://t.me/DailyJobsUpdatesportal`;
+      channelPost += `<b>👉 Join our WhatsApp Channel for mobile alerts:</b>\n`;
+      channelPost += `https://whatsapp.com/channel/0029VbCRYZN0Qeaep5uwNY3f`;
 
-      // Broadcast to configured channel or admin user
-      const targetChat = TELEGRAM_CHANNEL_ID || ALLOWED_USER_IDS.split(",")[0]?.trim();
-      if (targetChat) {
-        console.log(`[Auto-Scraper] Broadcasting ${newInsertedJobs.length} new jobs to Telegram target: ${targetChat}`);
-        await sendTelegramMessage(targetChat, channelPost);
+      // 3. Broadcast to Telegram Channel automatically
+      if (TELEGRAM_CHANNEL_ID) {
+        console.log(`[Auto-Scraper] Broadcasting ${newInsertedJobs.length} new jobs to Telegram channel: ${TELEGRAM_CHANNEL_ID}`);
+        await sendTelegramMessage(TELEGRAM_CHANNEL_ID, channelPost);
+      }
+
+      // 4. Send WhatsApp tap-to-copy block to Admin Chat
+      const adminChatId = ALLOWED_USER_IDS.split(",")[0]?.trim();
+      if (adminChatId) {
+        console.log(`[Auto-Scraper] Sending WhatsApp copy-template to admin chat: ${adminChatId}`);
+        const adminMsg = `🤖 <b>Auto-Scraper published ${newInsertedJobs.length} new job(s)!</b>\n\nHere is your ready-to-use WhatsApp template (tap code box below to copy):`;
+        await sendTelegramMessage(adminChatId, adminMsg);
+        await sendTelegramMessage(adminChatId, `<pre>${escapeHtml(whatsAppPost.trim())}</pre>`);
       }
     }
 

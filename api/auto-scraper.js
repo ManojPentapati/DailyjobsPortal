@@ -134,11 +134,24 @@ export default async function handler(req, res) {
 
     console.log(`[Auto-Scraper] Fetched ${scrapedJobs.length} potential fresher tech job listings across all companies.`);
 
-// Helper: Fuzzy title key generator
+// Helper: Check if location is suitable for Indian job seekers (India or Worldwide / Remote)
+function isTargetLocation(locationStr) {
+  if (!locationStr) return true;
+  const loc = locationStr.toLowerCase();
+  const excludedCountries = [
+    "brazil", "uruguay", "mexico", "germany", "france", "spain", "italy",
+    "uk only", "us only", "usa only", "canada only", "australia only", "japan",
+    "netherlands", "poland", "sweden", "finland", "norway"
+  ];
+  return !excludedCountries.some((country) => loc.includes(country));
+}
+
+// Helper: Fuzzy title key generator (strips location parentheticals and filler words)
 function getFuzzyKey(company, title) {
   const normCompany = (company || "").toLowerCase().replace(/[^a-z0-9]/g, "");
   const normTitle = (title || "")
     .toLowerCase()
+    .replace(/\(.*?\)/g, "") // Strip city/regional parentheticals like (Campinas) or (Belo Horizonte)
     .replace(/&/g, "and")
     .replace(/[^a-z0-9\s]/g, " ")
     .replace(/\b(fresher|freshers|trainee|intern|internship|associate|junior|sr|senior)\b/g, "")
@@ -169,6 +182,11 @@ function getFuzzyKey(company, title) {
     let skippedCount = 0;
 
     for (const job of scrapedJobs) {
+      if (!isTargetLocation(job.location)) {
+        skippedCount++;
+        continue;
+      }
+
       const jobKey = getFuzzyKey(job.company, job.title);
       const cleanJobLink = (job.apply_link || "").toLowerCase().split("?")[0].replace(/\/$/, "");
 

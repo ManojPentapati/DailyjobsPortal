@@ -2,6 +2,9 @@ import { createClient } from "@supabase/supabase-js";
 import axios from "axios";
 
 const {
+  TELEGRAM_BOT_TOKEN,
+  TELEGRAM_CHANNEL_ID = "",
+  ALLOWED_USER_IDS = "",
   VITE_SUPABASE_URL,
   VITE_SUPABASE_ANON_KEY,
   SUPABASE_SERVICE_ROLE_KEY,
@@ -9,6 +12,31 @@ const {
 
 const supabaseKey = SUPABASE_SERVICE_ROLE_KEY || VITE_SUPABASE_ANON_KEY || "";
 const supabase = createClient(VITE_SUPABASE_URL || "", supabaseKey);
+
+// Helper: Escape HTML special characters
+function escapeHtml(text) {
+  if (!text) return "";
+  return String(text)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+// Helper: Send message to Telegram
+async function sendTelegramMessage(chatId, text) {
+  if (!TELEGRAM_BOT_TOKEN || !chatId) return;
+  try {
+    const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+    await axios.post(url, {
+      chat_id: chatId,
+      text: text,
+      parse_mode: "HTML",
+      disable_web_page_preview: true
+    });
+  } catch (err) {
+    console.error(`[Auto-Scraper] Telegram broadcast error to ${chatId}:`, err.message);
+  }
+}
 
 // Helper: Generate URL slug
 const generateSlug = (company, title) => {
@@ -180,6 +208,7 @@ function getFuzzyKey(company, title) {
 
     let insertedCount = 0;
     let skippedCount = 0;
+    const newInsertedJobs = [];
 
     for (const job of scrapedJobs) {
       if (!isTargetLocation(job.location)) {
@@ -227,8 +256,46 @@ function getFuzzyKey(company, title) {
 
       if (!dbError) {
         insertedCount++;
+        newInsertedJobs.push({ ...job, slug: jobSlug });
       } else {
         console.error(`[Auto-Scraper] Failed to insert ${job.title}:`, dbError.message);
+      }
+    }
+
+    // Broadcast new jobs to Telegram Channel or Admin Chat
+    if (newInsertedJobs.length > 0) {
+      const today = new Date().toLocaleDateString("en-US", { day: "numeric", month: "long", year: "numeric" }).toUpperCase();
+      const portalUrlBase = "https://dailyjobs-portal.vercel.app";
+
+      let channelPost = `<b>📝 LATEST TECH JOB OPENINGS | ${today}</b>\n\n`;
+      newInsertedJobs.forEach((job) => {
+        const jobUrl = `${portalUrlBase}/jobs/${job.slug}`;
+        channelPost += `🌟 <b>${escapeHtml(job.company.toUpperCase())} IS HIRING!</b> 🌟\n`;
+        channelPost += `━━━━━━━━━━━━━━━━━━━━\n`;
+        channelPost += `  ◈ <b>Role:</b> ${escapeHtml(job.title)}\n`;
+        channelPost += `  ◈ <b>Location:</b> ${escapeHtml(job.location || "Across India")}\n`;
+        channelPost += `  ◈ <b>Degree:</b> ${escapeHtml(job.qualification || "Any Graduate")}\n`;
+        channelPost += `  ◈ <b>Experience:</b> ${escapeHtml(job.experience || "Freshers")}\n`;
+        channelPost += `  ◈ <b>Batch:</b> ${escapeHtml(job.passout_year || "Any")}\n`;
+        if (job.salary) {
+          channelPost += `  ◈ <b>Package:</b> ${escapeHtml(job.salary)}\n`;
+        }
+        channelPost += `━━━━━━━━━━━━━━━━━━━━\n`;
+        channelPost += `🚀 <b>Apply Link:</b> ${jobUrl}\n`;
+        channelPost += `⏰ <b>Apply ASAP! Link expires in 30 days.</b>\n\n\n`;
+      });
+
+      channelPost += `<b>📢 Share this opportunity with your Friends and WhatsApp Group ❤️</b>\n\n`;
+      channelPost += `<b>🌐 Search more tech jobs on our website:</b>\n`;
+      channelPost += `https://dailyjobs-portal.vercel.app\n\n`;
+      channelPost += `<b>👉 Join our Telegram Channel for daily updates:</b>\n`;
+      channelPost += `https://t.me/DailyJobsUpdatesportal`;
+
+      // Broadcast to configured channel or admin user
+      const targetChat = TELEGRAM_CHANNEL_ID || ALLOWED_USER_IDS.split(",")[0]?.trim();
+      if (targetChat) {
+        console.log(`[Auto-Scraper] Broadcasting ${newInsertedJobs.length} new jobs to Telegram target: ${targetChat}`);
+        await sendTelegramMessage(targetChat, channelPost);
       }
     }
 
@@ -238,6 +305,7 @@ function getFuzzyKey(company, title) {
       scrapedTotal: scrapedJobs.length,
       insertedCount,
       skippedCount,
+      broadcasted: newInsertedJobs.length > 0,
       time: new Date().toISOString(),
     });
   } catch (err) {

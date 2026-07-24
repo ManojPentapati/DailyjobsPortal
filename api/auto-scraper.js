@@ -42,7 +42,7 @@ const fetchLogoUrl = (companyName, fallbackLogo) => {
 
 // Helper: Clean and format HTML to plain text
 function cleanDescription(html) {
-  if (!html) return "Exciting technical opportunity at a leading tech company.";
+  if (!html) return "Exciting technical opportunity for freshers and early-career tech professionals.";
   const text = html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
   return text.substring(0, 1200) + (text.length > 1200 ? "..." : "");
 }
@@ -62,7 +62,7 @@ function categorizeJob(title, tags = []) {
 
 export default async function handler(req, res) {
   try {
-    console.log("[Auto-Scraper] Starting automated tech job aggregation...");
+    console.log("[Auto-Scraper] Starting automated fresher tech job aggregation for all companies...");
 
     const scrapedJobs = [];
 
@@ -70,21 +70,25 @@ export default async function handler(req, res) {
     try {
       const { data: arbeitRes } = await axios.get("https://www.arbeitnow.com/api/v1/jobs", { timeout: 8000 });
       if (arbeitRes && arbeitRes.data && Array.isArray(arbeitRes.data)) {
-        arbeitRes.data.slice(0, 15).forEach((item) => {
+        arbeitRes.data.slice(0, 20).forEach((item) => {
           if (item.title && item.url) {
             scrapedJobs.push({
               title: item.title,
               company: item.company_name || "Tech Corporation",
               location: item.location || "Remote / Across India",
-              experience: "Freshers / Experienced",
-              salary: "Industry Standard",
+              experience: "Freshers",
+              salary: "Best in Industry",
               category: categorizeJob(item.title, item.tags || []),
               description: cleanDescription(item.description),
-              skills: (item.tags || ["Software Development", "Coding", "Problem Solving"]).slice(0, 5),
-              responsibilities: ["Develop scalable software solutions", "Collaborate with cross-functional technical teams", "Maintain code quality and documentation"],
-              qualification: "B.E / B.Tech / MCA / B.Sc",
-              passout_year: "Any",
-              job_type: item.remote ? "Full-time" : "Full-time",
+              skills: (item.tags || ["Software Engineering", "Coding", "Problem Solving"]).slice(0, 5),
+              responsibilities: [
+                "Build and maintain responsive software application features",
+                "Work closely with engineering teams on technical solutions",
+                "Write clean, well-tested, and maintainable code"
+              ],
+              qualification: "B.E / B.Tech / MCA / B.Sc / Any Graduate",
+              passout_year: "2024, 2025, 2026, Any",
+              job_type: "Full-time",
               apply_link: item.url,
               company_logo: null
             });
@@ -97,22 +101,26 @@ export default async function handler(req, res) {
 
     // Source 2: Remotive Software Development Jobs API
     try {
-      const { data: remotiveRes } = await axios.get("https://remotive.com/api/remote-jobs?category=software-dev&limit=15", { timeout: 8000 });
+      const { data: remotiveRes } = await axios.get("https://remotive.com/api/remote-jobs?category=software-dev&limit=20", { timeout: 8000 });
       if (remotiveRes && remotiveRes.jobs && Array.isArray(remotiveRes.jobs)) {
-        remotiveRes.jobs.slice(0, 15).forEach((item) => {
+        remotiveRes.jobs.slice(0, 20).forEach((item) => {
           if (item.title && item.url) {
             scrapedJobs.push({
               title: item.title,
-              company: item.company_name || "Global Tech",
+              company: item.company_name || "Global Tech Firm",
               location: item.candidate_required_location || "Remote",
-              experience: "0-2 Years / Experienced",
-              salary: item.salary || "Best in Industry",
+              experience: "Freshers",
+              salary: item.salary || "As per Market Standards",
               category: categorizeJob(item.title, item.tags || []),
               description: cleanDescription(item.description),
-              skills: (item.tags || ["Full Stack", "JavaScript", "Python", "Cloud"]).slice(0, 5),
-              responsibilities: ["Build enterprise grade web applications", "Optimize backend services and system performance", "Participate in agile sprint planning and code reviews"],
-              qualification: "Degree in Computer Science or Related Field",
-              passout_year: "Any",
+              skills: (item.tags || ["Full Stack", "JavaScript", "Python", "Problem Solving"]).slice(0, 5),
+              responsibilities: [
+                "Develop enterprise application components and REST APIs",
+                "Perform unit testing, debugging, and software optimization",
+                "Participate in technical design discussions and agile team sprints"
+              ],
+              qualification: "B.E / B.Tech / MCA / Computer Science Degree",
+              passout_year: "2024, 2025, 2026, Any",
               job_type: "Full-time",
               apply_link: item.url,
               company_logo: item.company_logo_url || null
@@ -124,7 +132,7 @@ export default async function handler(req, res) {
       console.error("[Auto-Scraper] Remotive API fetch failed:", e2.message);
     }
 
-    console.log(`[Auto-Scraper] Fetched ${scrapedJobs.length} potential tech job listings.`);
+    console.log(`[Auto-Scraper] Fetched ${scrapedJobs.length} potential fresher tech job listings across all companies.`);
 
     let insertedCount = 0;
     let skippedCount = 0;
@@ -133,7 +141,7 @@ export default async function handler(req, res) {
       const logoUrl = fetchLogoUrl(job.company, job.company_logo);
       const jobSlug = generateSlug(job.company, job.title);
 
-      // Check for duplicate in database
+      // Check for duplicate in database by link or slug
       const { data: existingLink } = await supabase
         .from("jobs")
         .select("id")
@@ -187,7 +195,7 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       success: true,
-      message: `Auto-scraper execution completed.`,
+      message: `Auto-scraper completed for all companies and freshers.`,
       scrapedTotal: scrapedJobs.length,
       insertedCount,
       skippedCount,

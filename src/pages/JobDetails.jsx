@@ -343,38 +343,7 @@ export default function JobDetails() {
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Main content */}
           <div className="lg:col-span-2 space-y-8">
-            {/* Walk-in details block */}
-            {job.job_type === "Walk-in" && walkinData && (
-              <div className="p-6 rounded-2xl bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-transparent border border-amber-200/60 dark:border-amber-900/30 shadow-sm relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-4 opacity-5 dark:opacity-10 pointer-events-none select-none">
-                  <span className="text-7xl font-bold">🚶‍♂️</span>
-                </div>
-                <h3 className="text-md font-bold text-amber-800 dark:text-amber-400 flex items-center gap-2 mb-4">
-                  <span className="p-1 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">🚶‍♂️</span>
-                  Walk-in Interview Details
-                </h3>
-                <div className="grid sm:grid-cols-2 gap-4 text-sm">
-                  <div className="space-y-1">
-                    <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Date & Time</p>
-                    <p className="font-semibold text-slate-800 dark:text-slate-200">{walkinData.dateTime}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Interview Venue</p>
-                    <p className="font-semibold text-slate-800 dark:text-slate-200 break-words">{walkinData.venue}</p>
-                  </div>
-                </div>
-                <div className="mt-4">
-                  <a
-                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(walkinData.venue)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 transition-all shadow-sm"
-                  >
-                    <MapPin className="w-3.5 h-3.5" /> Navigate on Maps
-                  </a>
-                </div>
-              </div>
-            )}
+
 
             {/* Description */}
             <div className="card-flat p-6">

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "../../lib/supabase";
 
 // Static options that don't change based on data
-const STATIC_JOB_TYPES = ["Full-time", "Part-time", "Contract", "Internship", "Freelance", "Walk-in"];
+const STATIC_JOB_TYPES = ["Full-time", "Part-time", "Contract", "Internship", "Freelance"];
 const STATIC_SALARY_RANGES = ["0-5 LPA", "5-10 LPA", "10-20 LPA", "20+ LPA"];
 
 function FilterSection({ section, selected, onToggle, loading, initialOpen = false }) {

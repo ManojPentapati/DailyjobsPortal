@@ -7,7 +7,6 @@ import { useJobs } from "../../context/JobContext";
 const navLinks = [
   { to: "/", label: "Home" },
   { to: "/jobs", label: "Find Jobs" },
-  { to: "/jobs?type=Walk-in", label: "Walk-ins" },
   { to: "/categories", label: "Categories" },
   { to: "/blog", label: "Career Advice" },
   { to: "/saved-jobs", label: "Saved" },
@@ -77,11 +76,7 @@ export default function Navbar() {
               {navLinks.map((link) => {
                 const isActive = link.to === "/"
                   ? location.pathname === "/"
-                  : link.to.includes("type=Walk-in")
-                    ? location.pathname === "/jobs" && location.search.includes("type=Walk-in")
-                    : link.to === "/jobs"
-                      ? location.pathname === "/jobs" && !location.search.includes("type=Walk-in")
-                      : location.pathname === link.to;
+                  : location.pathname === link.to;
 
                 return (
                   <Link
@@ -152,11 +147,7 @@ export default function Navbar() {
                 {navLinks.map((link) => {
                   const isActive = link.to === "/"
                     ? location.pathname === "/"
-                    : link.to.includes("type=Walk-in")
-                      ? location.pathname === "/jobs" && location.search.includes("type=Walk-in")
-                      : link.to === "/jobs"
-                        ? location.pathname === "/jobs" && !location.search.includes("type=Walk-in")
-                        : location.pathname === link.to;
+                    : location.pathname === link.to;
 
                   return (
                     <Link

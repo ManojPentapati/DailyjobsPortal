@@ -353,31 +353,39 @@ IMPORTANT: Always normalize location to standard city names and experience to st
       return `${baseSlug}-${randomSuffix}`.substring(0, 100);
     };
 
+    // Fetch existing active jobs to perform strict duplicate checking
+    const { data: existingActiveJobs } = await supabase
+      .from("jobs")
+      .select("id, title, company, apply_link")
+      .eq("is_active", true);
+
+    const existingKeys = new Set(
+      (existingActiveJobs || []).map((j) =>
+        `${(j.company || "").toLowerCase().trim().replace(/[^a-z0-9]/g, "")}-${(j.title || "").toLowerCase().trim().replace(/[^a-z0-9]/g, "")}`
+      )
+    );
+
+    const existingLinks = new Set(
+      (existingActiveJobs || []).map((j) =>
+        (j.apply_link || "").toLowerCase().split("?")[0].replace(/\/$/, "")
+      ).filter(Boolean)
+    );
+
     // Loop through each job and save to Supabase
     for (const jobData of jobsData) {
-      const logoUrl = await fetchLogoUrl(jobData.company);
-      const jobSlug = generateSlug(jobData.company, jobData.title);
+      const cleanCompanyKey = (jobData.company || "").toLowerCase().trim().replace(/[^a-z0-9]/g, "");
+      const cleanTitleKey = (jobData.title || "").toLowerCase().trim().replace(/[^a-z0-9]/g, "");
+      const jobKey = `${cleanCompanyKey}-${cleanTitleKey}`;
+      const cleanJobLink = (jobData.apply_link || "").toLowerCase().split("?")[0].replace(/\/$/, "");
 
-      // Check for duplicate: same apply_link OR same slug (active jobs only)
-      const { data: existingByLink } = await supabase
-        .from("jobs")
-        .select("id")
-        .eq("apply_link", jobData.apply_link)
-        .eq("is_active", true)
-        .maybeSingle();
-
-      const { data: existingBySlug } = await supabase
-        .from("jobs")
-        .select("id")
-        .eq("slug", jobSlug)
-        .eq("is_active", true)
-        .maybeSingle();
-
-      if (existingByLink || existingBySlug) {
+      if (existingKeys.has(jobKey) || (cleanJobLink && existingLinks.has(cleanJobLink))) {
         console.log(`Skipping duplicate job: ${jobData.title} at ${jobData.company}`);
         skippedCount++;
         continue;
       }
+
+      const logoUrl = await fetchLogoUrl(jobData.company);
+      const jobSlug = generateSlug(jobData.company, jobData.title);
 
       const days = parseInt(jobData.expires_in_days) || 7;
       const expiresAt = new Date();

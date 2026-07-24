@@ -134,30 +134,40 @@ export default async function handler(req, res) {
 
     console.log(`[Auto-Scraper] Fetched ${scrapedJobs.length} potential fresher tech job listings across all companies.`);
 
+    // Fetch existing active jobs to perform strict duplicate checking
+    const { data: existingActiveJobs } = await supabase
+      .from("jobs")
+      .select("id, title, company, apply_link")
+      .eq("is_active", true);
+
+    const existingKeys = new Set(
+      (existingActiveJobs || []).map((j) =>
+        `${(j.company || "").toLowerCase().trim().replace(/[^a-z0-9]/g, "")}-${(j.title || "").toLowerCase().trim().replace(/[^a-z0-9]/g, "")}`
+      )
+    );
+
+    const existingLinks = new Set(
+      (existingActiveJobs || []).map((j) =>
+        (j.apply_link || "").toLowerCase().split("?")[0].replace(/\/$/, "")
+      ).filter(Boolean)
+    );
+
     let insertedCount = 0;
     let skippedCount = 0;
 
     for (const job of scrapedJobs) {
-      const logoUrl = fetchLogoUrl(job.company, job.company_logo);
-      const jobSlug = generateSlug(job.company, job.title);
+      const cleanCompanyKey = (job.company || "").toLowerCase().trim().replace(/[^a-z0-9]/g, "");
+      const cleanTitleKey = (job.title || "").toLowerCase().trim().replace(/[^a-z0-9]/g, "");
+      const jobKey = `${cleanCompanyKey}-${cleanTitleKey}`;
+      const cleanJobLink = (job.apply_link || "").toLowerCase().split("?")[0].replace(/\/$/, "");
 
-      // Check for duplicate in database by link or slug
-      const { data: existingLink } = await supabase
-        .from("jobs")
-        .select("id")
-        .eq("apply_link", job.apply_link)
-        .maybeSingle();
-
-      const { data: existingSlug } = await supabase
-        .from("jobs")
-        .select("id")
-        .eq("slug", jobSlug)
-        .maybeSingle();
-
-      if (existingLink || existingSlug) {
+      if (existingKeys.has(jobKey) || (cleanJobLink && existingLinks.has(cleanJobLink))) {
         skippedCount++;
         continue;
       }
+
+      const logoUrl = fetchLogoUrl(job.company, job.company_logo);
+      const jobSlug = generateSlug(job.company, job.title);
 
       // Expiration: 30 days for automated job postings
       const expiresAt = new Date();
